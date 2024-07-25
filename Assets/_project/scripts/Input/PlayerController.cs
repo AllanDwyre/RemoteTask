@@ -26,8 +26,8 @@ namespace _project.scripts.Input
         private float _zoom, _velocity;
         
         private TileSelection _tileSelection;
-        private List<CharacterMovement> _charactersSelected;
-        private CharacterMovement _characterSelected;
+        private List<AgentController> _charactersSelected;
+        private AgentController _characterSelected;
        
         
         private CinemachineVirtualCamera _camera;
@@ -38,6 +38,10 @@ namespace _project.scripts.Input
         {
             _camera = GetComponent<CinemachineVirtualCamera>();
             _tileSelection = FindObjectOfType<TileSelection>();
+        }
+
+        private void Start()
+        {
             GameManager.Instance.OnStateChangeEvent += SetPlayerAgents;
         }
 
@@ -46,7 +50,7 @@ namespace _project.scripts.Input
             if(state != EGameState.Gameplay || _characterSelected != null)
                 return;
 
-            _characterSelected = FindObjectOfType<CharacterMovement>();
+            _characterSelected = FindObjectOfType<AgentController>();
         }
 
         private void OnEnable()
@@ -71,7 +75,7 @@ namespace _project.scripts.Input
             Vector2 targetPosition = _tileSelection.GetWorldHighlightedTilePosition;
             Vector2Int clickedTile = GridUtils.WorldToGrid(targetPosition);
 
-            var command = new WalkingToCommand(clickedTile, _characterSelected);
+            var command = new WalkingToCommand(clickedTile, _characterSelected.GetComponent<CharacterMovement>());
             _characterSelected.ExecuteCommand(command);
         }
         
@@ -81,7 +85,7 @@ namespace _project.scripts.Input
             Vector2 targetPosition = _tileSelection.GetWorldHighlightedTilePosition;
             Vector2Int clickedTile = GridUtils.WorldToGrid(targetPosition);
             
-            var command = new WalkingToCommand(clickedTile, _characterSelected);
+            var command = new WalkingToCommand(clickedTile, _characterSelected.GetComponent<CharacterMovement>());
             _characterSelected.AddCommand(command);
         }
 

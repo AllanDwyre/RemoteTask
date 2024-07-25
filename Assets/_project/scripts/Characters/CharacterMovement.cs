@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using _project.scripts.commands;
 using _project.scripts.grid;
@@ -20,13 +19,15 @@ namespace _project.scripts.Characters
 
         private Vector2 _targetPosition;
         private bool _isMoving = false;
+        private bool _hadCommand = false;
         private MovementDirection _currentDirection = MovementDirection.North;
         private Coroutine _currentCoroutine;
-        private Queue<ICommand> _commands = new Queue<ICommand>();
+        private CharacterControllerBase _controllerBase;
 
         private void Awake()
         {
             obstacleTileMap = FindObjectOfType<ObstacleTileMap>();
+            _controllerBase = GetComponent<CharacterControllerBase>();
         }
 
         public override void OnNetworkSpawn()
@@ -40,26 +41,17 @@ namespace _project.scripts.Characters
             {
                 MoveTowardsTarget();
             }
-            else
+            else if (_hadCommand)
             {
-                if (_commands.TryDequeue(out var command))
-                {
-                    command.Execute();
-                }
+                _hadCommand = false;
+                _controllerBase.HasFinishedCurrentTask();
             }
         }
         
-        public void AddCommand(ICommand command)
-        {
-            _commands.Enqueue(command);
-        }
-        public void ExecuteCommand(ICommand command)
-        {
-            _commands.Clear();
-            command.Execute();
-        }
         public void MoveToTarget(Vector2Int targetPosition)
         {
+            _hadCommand = true;
+            
             if (obstacleTileMap.IsTileObstacle(targetPosition) ||  (Vector2) targetPosition == Vector2Int.zero)
             {
                 return;
