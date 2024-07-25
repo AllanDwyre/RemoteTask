@@ -1,13 +1,15 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using _project.scripts.commands;
 using _project.scripts.grid;
 using _project.scripts.pathfinding;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace _project.scripts.Characters
 {
-    public class CharacterMovement : MonoBehaviour
+    public class CharacterMovement : NetworkBehaviour
     {
         [Header("Movement Settings")]
         
@@ -21,6 +23,17 @@ namespace _project.scripts.Characters
         private MovementDirection _currentDirection = MovementDirection.North;
         private Coroutine _currentCoroutine;
         private Queue<ICommand> _commands = new Queue<ICommand>();
+
+        private void Awake()
+        {
+            obstacleTileMap = FindObjectOfType<ObstacleTileMap>();
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            if(!IsOwner) Destroy(this);
+        }
+
         private void Update()
         {
             if (_isMoving)
@@ -35,7 +48,7 @@ namespace _project.scripts.Characters
                 }
             }
         }
-
+        
         public void AddCommand(ICommand command)
         {
             _commands.Enqueue(command);
@@ -47,17 +60,20 @@ namespace _project.scripts.Characters
         }
         public void MoveToTarget(Vector2Int targetPosition)
         {
+            if (obstacleTileMap.IsTileObstacle(targetPosition) ||  (Vector2) targetPosition == Vector2Int.zero)
+            {
+                return;
+            }
+            
             _targetPosition = targetPosition;
+            
             if (_isMoving && _currentCoroutine != null)
             {
                 _isMoving = false;
                 StopCoroutine(_currentCoroutine);
             }
-            
-            if (!obstacleTileMap.IsTileObstacle(_targetPosition) && _targetPosition != Vector2Int.zero)
-            {
-                FindPathToTargetPosition();
-            }
+     
+            FindPathToTargetPosition();
         }
         
         private void FindPathToTargetPosition()

@@ -29,7 +29,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             ""actions"": [
                 {
                     ""name"": ""Pause"",
-                    ""type"": ""PassThrough"",
+                    ""type"": ""Button"",
                     ""id"": ""1bd0cdb8-28d4-495d-b130-8541f3edcb95"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
@@ -38,21 +38,21 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": ""Movement"",
-                    ""type"": ""PassThrough"",
+                    ""type"": ""Value"",
                     ""id"": ""e886344a-594f-43ed-a06b-b1b05f1772fa"",
                     ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 },
                 {
                     ""name"": ""Zoom"",
-                    ""type"": ""PassThrough"",
+                    ""type"": ""Value"",
                     ""id"": ""f4118b61-2983-47d9-b567-f31cebba4226"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Double"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [

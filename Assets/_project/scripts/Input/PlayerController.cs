@@ -1,17 +1,21 @@
+using System;
 using System.Collections.Generic;
 using _project.scripts.Characters;
 using _project.scripts.commands;
+using _project.scripts.Core;
 using _project.scripts.grid;
 using Cinemachine;
+using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 namespace _project.scripts.Input
 {
     [RequireComponent(typeof(CinemachineVirtualCamera))]
     public class PlayerController : MonoBehaviour
     {
+        [Header("Input Dependency")]
+        [SerializeField] private InputReader controls;
+
         [Header("CameraSettings")]
         [SerializeField] private float speed = 2f;
         [SerializeField] private float speedMultiplier = 8f;
@@ -21,31 +25,37 @@ namespace _project.scripts.Input
         [SerializeField] private float smoothTime = 0.25f;
         private float _zoom, _velocity;
         
-        [Header("World Controls Dependency")]
-        [SerializeField] private TileSelection tileSelection;
-        [SerializeField] private CharacterMovement characterSelected;
+        private TileSelection _tileSelection;
+        private List<CharacterMovement> _charactersSelected;
+        private CharacterMovement _characterSelected;
        
         
-        private PlayerActions _controls;
         private CinemachineVirtualCamera _camera;
+        private float _scroll;
+        private Vector2 _movement;
 
         private void Awake()
         {
-            _controls = new PlayerActions();
             _camera = GetComponent<CinemachineVirtualCamera>();
+            _tileSelection = FindObjectOfType<TileSelection>();
+            GameManager.Instance.OnStateChangeEvent += SetPlayerAgents;
+        }
+
+        private void SetPlayerAgents(EGameState state)
+        {
+            if(state != EGameState.Gameplay || _characterSelected != null)
+                return;
+
+            _characterSelected = FindObjectOfType<CharacterMovement>();
         }
 
         private void OnEnable()
         {
-            _controls.Enable();
-            _controls.interaction.Context.canceled += _ => GetContextOrAction();
-            _controls.interaction.QueueActions.performed += QueueAction;
-            _controls.interaction.Selection.canceled += _ => SelectObject();
-        }
-
-        private void OnDisable()
-        {
-            _controls.Disable();
+            controls.QueueActionEvent += QueueAction;
+            controls.ContextEvent += GetContextOrAction;
+            controls.SelectionCanceledEvent += SelectObject;
+            controls.MoveEvent += HandleMovement;
+            controls.ZoomEvent += HandleZoom;
         }
 
         private void Update()
@@ -56,36 +66,35 @@ namespace _project.scripts.Input
 
         private void GetContextOrAction()
         {
-            if (Keyboard.current.shiftKey.ReadValue() > 0) // Combo aren't well-supported in the new input system
-            {
-                return;
-            }
+
             Debug.Log("Clicked !");
-            Vector2 targetPosition = tileSelection.GetWorldHighlightedTilePosition;
+            Vector2 targetPosition = _tileSelection.GetWorldHighlightedTilePosition;
             Vector2Int clickedTile = GridUtils.WorldToGrid(targetPosition);
 
-            var command = new WalkingToCommand(clickedTile, characterSelected);
-            characterSelected.ExecuteCommand(command);
+            var command = new WalkingToCommand(clickedTile, _characterSelected);
+            _characterSelected.ExecuteCommand(command);
         }
         
-        private void QueueAction(InputAction.CallbackContext context)
+        private void QueueAction()
         {
             Debug.Log("Clicked Queue!");
-            Vector2 targetPosition = tileSelection.GetWorldHighlightedTilePosition;
+            Vector2 targetPosition = _tileSelection.GetWorldHighlightedTilePosition;
             Vector2Int clickedTile = GridUtils.WorldToGrid(targetPosition);
             
-            var command = new WalkingToCommand(clickedTile, characterSelected);
-            characterSelected.AddCommand(command);
+            var command = new WalkingToCommand(clickedTile, _characterSelected);
+            _characterSelected.AddCommand(command);
         }
 
         private void SelectObject()
         {
+            
         }
 
+        private void HandleZoom(float scroll) => _scroll = scroll;
+        private void HandleMovement(Vector2 movement) => _movement = movement;
         private void Zoom()
         {
-            float scroll = _controls.main.Zoom.ReadValue<float>();
-            _zoom -= scroll * zoomMultiplier;
+            _zoom -= _scroll * zoomMultiplier;
             _zoom = Mathf.Clamp(value: _zoom, minZoom, maxZoom);
             _camera.m_Lens.OrthographicSize =
                 Mathf.SmoothDamp(_camera.m_Lens.OrthographicSize, _zoom, ref _velocity, smoothTime);
@@ -93,10 +102,9 @@ namespace _project.scripts.Input
 
         private void Move()
         {
-            Vector2 movement = _controls.main.Movement.ReadValue<Vector2>();
             float speedMultiplierRatio = (_zoom - minZoom) / maxZoom + 1;
             float multiplier = speedMultiplierRatio * speedMultiplier;
-            transform.Translate(movement * (speed * multiplier * Time.deltaTime));
+            transform.Translate(_movement * (speed * multiplier * Time.deltaTime));
         }
     }
 }
