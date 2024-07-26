@@ -14,10 +14,11 @@ namespace _project.scripts.Characters
         {
             get;
             private set;
-        } = false;
+        } = true;
         
         public void HasFinishedCurrentTask()
         {
+            IsIdle = true;
             ExecuteNextCommand();
         }
 
@@ -33,13 +34,13 @@ namespace _project.scripts.Characters
         {
             if (!EvaluateCommand(command)) return;
 
-            IsIdle = true;
+            IsIdle = false;
             command.Execute();
         }
         
         public void ExecuteCommandWithoutEvaluate(ICommand command)
         {
-            IsIdle = true;
+            IsIdle = false;
             command.Execute();
         }
         
@@ -47,7 +48,7 @@ namespace _project.scripts.Characters
         {
             var command = _controller.DequeueCommand();
             if (command == null || !EvaluateCommand(command)) return;
-            IsIdle = true;
+            IsIdle = false;
             command.Execute();
         }
         
@@ -56,7 +57,7 @@ namespace _project.scripts.Characters
             var command = _controller.DequeueCommand();
             if (command == null) return;
             
-            IsIdle = true;
+            IsIdle = false;
             command.Execute();
         }
         public void AddCommand(ICommand command)

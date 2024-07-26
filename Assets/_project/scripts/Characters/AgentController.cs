@@ -11,6 +11,17 @@ namespace _project.scripts.Characters
 
         protected override bool EvaluateCommand(ICommand command)
         {
+            if (!EvaluateWalkToCommand(command)) return false;
+            
+            return true;
+        }
+
+        private static bool EvaluateWalkToCommand(ICommand command)
+        {
+            if (command is not WalkingToCommand walkingToCommand) return true;
+            
+            if (walkingToCommand.ToPosition == walkingToCommand.Receiver.TargetPosition) return false;
+
             return true;
         }
     }

@@ -16,8 +16,10 @@ namespace _project.scripts.Characters
         [SerializeField] private Vector2 gridSize = Vector2.one;
         [SerializeField] private ObstacleTileMap obstacleTileMap;
         
+        public Vector2 TargetPosition { get; private set; }
 
-        private Vector2 _targetPosition;
+        private Vector2 _moveToPosition;
+        
         private bool _isMoving = false;
         private bool _hadCommand = false;
         private MovementDirection _currentDirection = MovementDirection.North;
@@ -57,7 +59,7 @@ namespace _project.scripts.Characters
                 return;
             }
             
-            _targetPosition = targetPosition;
+            TargetPosition = targetPosition;
             
             if (_isMoving && _currentCoroutine != null)
             {
@@ -71,7 +73,7 @@ namespace _project.scripts.Characters
         private void FindPathToTargetPosition()
         {
             Vector2 startPosition = transform.position;
-            List<Vector2> path = AStar.FindPath(startPosition, _targetPosition, gridSize, obstacleTileMap.IsTileObstacle);
+            List<Vector2> path = AStar.FindPath(startPosition, TargetPosition, gridSize, obstacleTileMap.IsTileObstacle);
 
             if (path != null && path.Count > 0)
             {
@@ -86,12 +88,12 @@ namespace _project.scripts.Characters
 
             while (currentWaypointIndex < path.Count)
             {
-                _targetPosition = path[currentWaypointIndex] + gridSize / 2;
+                _moveToPosition = path[currentWaypointIndex] + gridSize / 2;
 
-                while ((Vector2) transform.position != _targetPosition)
+                while ((Vector2) transform.position != _moveToPosition)
                 {
                     float step = moveSpeed * Time.deltaTime;
-                    transform.position = Vector3.MoveTowards(transform.position, _targetPosition, step);
+                    transform.position = Vector3.MoveTowards(transform.position, _moveToPosition, step);
 
                     yield return new WaitForFixedUpdate();
                 }
@@ -102,7 +104,7 @@ namespace _project.scripts.Characters
         }
         private void MoveTowardsTarget()
         {
-            Vector2 direction = (_targetPosition - (Vector2)transform.position).normalized;
+            Vector2 direction = (_moveToPosition - (Vector2)transform.position).normalized;
 
             if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
             {

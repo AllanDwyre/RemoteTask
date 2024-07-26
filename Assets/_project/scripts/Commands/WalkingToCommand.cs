@@ -5,19 +5,19 @@ namespace _project.scripts.commands
 {
     public class WalkingToCommand : ICommand
     {
-        private Vector2Int _toPosition;
-        private CharacterMovement _agentReceiver;
+        public Vector2Int ToPosition { get; private set;}
+        public CharacterMovement Receiver { get; private set;}
 
-        public WalkingToCommand(Vector2Int toPosition, CharacterMovement agentReceiver)
+        public WalkingToCommand(Vector2Int toPosition, CharacterMovement receiver)
         {
-            _toPosition = toPosition;
-            _agentReceiver = agentReceiver;
+            ToPosition = toPosition;
+            Receiver = receiver;
         }
 
         public void Execute()
         {
             Debug.Log("Executed");
-            _agentReceiver.MoveToTarget(_toPosition);
+            Receiver.MoveToTarget(ToPosition);
         }
     }
 }

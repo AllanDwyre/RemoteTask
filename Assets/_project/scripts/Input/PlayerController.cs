@@ -92,8 +92,7 @@ namespace _project.scripts.Input
         {
 
             Vector2 mousePosition = Helper.Camera.ScreenToWorldPoint(Helper.MousePosition);
-            // TODO : maybe a circle cast to deal with the pixel perfect precision
-            RaycastHit2D hit = Physics2D.CircleCast(mousePosition, .4f, Vector2.zero);
+            RaycastHit2D hit = Physics2D.CircleCast(mousePosition, .5f, Vector2.zero);
 
             if (hit.collider != null)
             {
