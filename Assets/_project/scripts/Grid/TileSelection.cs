@@ -16,7 +16,7 @@ namespace _project.scripts.grid
         [SerializeField] private Vector2 _gridSize = new Vector2(1f, 1f);
 
         public Vector2Int HighlightedTilePosition {  get; private set; } = Vector2Int.zero;
-        public Vector2 GetWorldHighlightedTilePosition => GridUtils.GridToWorld(HighlightedTilePosition);
+        public Vector2 WorldHighlightedTilePosition => GridUtils.GridToWorld(HighlightedTilePosition);
 
         public bool IsHighlightedTileClicked(Vector2 clickedPosition)
         {
@@ -29,7 +29,7 @@ namespace _project.scripts.grid
         }
         private void Update()
         {
-            Vector3 mouseWorldPos = Helper.Camera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+            Vector3 mouseWorldPos = Helper.Camera.ScreenToWorldPoint(Helper.MousePosition);
 
             Vector2Int gridPos = new Vector2Int(
                 Mathf.FloorToInt(mouseWorldPos.x / _gridSize.x) * Mathf.RoundToInt(_gridSize.x),

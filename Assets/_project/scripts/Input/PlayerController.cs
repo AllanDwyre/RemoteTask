@@ -4,9 +4,11 @@ using _project.scripts.Characters;
 using _project.scripts.commands;
 using _project.scripts.Core;
 using _project.scripts.grid;
+using _project.scripts.utils;
 using Cinemachine;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace _project.scripts.Input
 {
@@ -26,8 +28,8 @@ namespace _project.scripts.Input
         private float _zoom, _velocity;
         
         private TileSelection _tileSelection;
-        private List<AgentController> _charactersSelected;
-        private AgentController _characterSelected;
+        private List<AgentController> _charactersSelected = new();
+        private AgentController _selectedCharacter;
        
         
         private CinemachineVirtualCamera _camera;
@@ -47,10 +49,10 @@ namespace _project.scripts.Input
 
         private void SetPlayerAgents(EGameState state)
         {
-            if(state != EGameState.Gameplay || _characterSelected != null)
+            if(state != EGameState.Gameplay || _selectedCharacter != null)
                 return;
 
-            _characterSelected = FindObjectOfType<AgentController>();
+            _selectedCharacter = FindObjectOfType<AgentController>();
         }
 
         private void OnEnable()
@@ -70,28 +72,38 @@ namespace _project.scripts.Input
 
         private void GetContextOrAction()
         {
-
-            Debug.Log("Clicked !");
-            Vector2 targetPosition = _tileSelection.GetWorldHighlightedTilePosition;
+            Vector2 targetPosition = _tileSelection.WorldHighlightedTilePosition;
             Vector2Int clickedTile = GridUtils.WorldToGrid(targetPosition);
 
-            var command = new WalkingToCommand(clickedTile, _characterSelected.GetComponent<CharacterMovement>());
-            _characterSelected.ExecuteCommand(command);
+            var command = new WalkingToCommand(clickedTile, _selectedCharacter.GetComponent<CharacterMovement>());
+            _selectedCharacter.ExecuteCommand(command);
         }
         
         private void QueueAction()
         {
-            Debug.Log("Clicked Queue!");
-            Vector2 targetPosition = _tileSelection.GetWorldHighlightedTilePosition;
+            Vector2 targetPosition = _tileSelection.WorldHighlightedTilePosition;
             Vector2Int clickedTile = GridUtils.WorldToGrid(targetPosition);
             
-            var command = new WalkingToCommand(clickedTile, _characterSelected.GetComponent<CharacterMovement>());
-            _characterSelected.AddCommand(command);
+            var command = new WalkingToCommand(clickedTile, _selectedCharacter.GetComponent<CharacterMovement>());
+            _selectedCharacter.AddCommand(command);
         }
 
         private void SelectObject()
         {
-            
+
+            Vector2 mousePosition = Helper.Camera.ScreenToWorldPoint(Helper.MousePosition);
+            // TODO : maybe a circle cast to deal with the pixel perfect precision
+            RaycastHit2D hit = Physics2D.CircleCast(mousePosition, .4f, Vector2.zero);
+
+            if (hit.collider != null)
+            {
+                CharacterControllerBase character = hit.collider.GetComponent<CharacterControllerBase>();
+
+                if (character != null && character is AgentController agent)
+                {
+                    _selectedCharacter = agent;
+                }
+            }
         }
 
         private void HandleZoom(float scroll) => _scroll = scroll;
@@ -110,5 +122,6 @@ namespace _project.scripts.Input
             float multiplier = speedMultiplierRatio * speedMultiplier;
             transform.Translate(_movement * (speed * multiplier * Time.deltaTime));
         }
+        
     }
 }

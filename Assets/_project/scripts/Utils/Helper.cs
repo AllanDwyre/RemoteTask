@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace _project.scripts.utils
 {
@@ -14,7 +15,8 @@ namespace _project.scripts.utils
                 return _camera;
             }
         }
-        
-        
+
+        public static Vector2 MousePosition => Mouse.current.position.ReadValue();
+
     }
 }

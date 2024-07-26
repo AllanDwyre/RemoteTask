@@ -7,6 +7,8 @@ namespace _project.scripts.commands
     {
         private Queue<ICommand> _commands = new Queue<ICommand>();
 
+        public int Count => _commands.Count;
+        
         public void AddCommand(ICommand command)
         {
             _commands.Enqueue(command);

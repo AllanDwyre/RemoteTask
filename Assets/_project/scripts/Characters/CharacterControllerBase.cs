@@ -1,4 +1,5 @@
-﻿using _project.scripts.commands;
+﻿using System;
+using _project.scripts.commands;
 using UnityEngine;
 
 namespace _project.scripts.Characters
@@ -8,33 +9,55 @@ namespace _project.scripts.Characters
     public abstract class CharacterControllerBase : MonoBehaviour
     {
         private readonly CommandManager _controller = new();
+
+        protected bool IsIdle
+        {
+            get;
+            private set;
+        } = false;
         
-        public void HasFinishedCurrentTask() => ExecuteNextCommand();
+        public void HasFinishedCurrentTask()
+        {
+            ExecuteNextCommand();
+        }
 
         protected abstract bool EvaluateCommand(ICommand command);
-        
+
+        protected void Update()
+        {
+            if(!IsIdle || _controller.Count == 0) return;
+            ExecuteNextCommand();
+        }
+
         public void ExecuteCommand(ICommand command)
         {
             if (!EvaluateCommand(command)) return;
-           
+
+            IsIdle = true;
             command.Execute();
         }
         
         public void ExecuteCommandWithoutEvaluate(ICommand command)
         {
+            IsIdle = true;
             command.Execute();
         }
         
         public void ExecuteNextCommand()
         {
             var command = _controller.DequeueCommand();
-            if (!EvaluateCommand(command)) return;
-            command?.Execute();
+            if (command == null || !EvaluateCommand(command)) return;
+            IsIdle = true;
+            command.Execute();
         }
         
         public void ExecuteNextCommandWithoutEvaluate()
         {
-            _controller.DequeueCommand()?.Execute();
+            var command = _controller.DequeueCommand();
+            if (command == null) return;
+            
+            IsIdle = true;
+            command.Execute();
         }
         public void AddCommand(ICommand command)
         {
