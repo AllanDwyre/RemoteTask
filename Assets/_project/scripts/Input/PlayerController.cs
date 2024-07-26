@@ -13,7 +13,7 @@ using UnityEngine.InputSystem;
 namespace _project.scripts.Input
 {
     [RequireComponent(typeof(CinemachineVirtualCamera))]
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : NetworkBehaviour
     {
         [Header("Input Dependency")]
         [SerializeField] private InputReader controls;
@@ -29,6 +29,7 @@ namespace _project.scripts.Input
         
         private TileSelection _tileSelection;
         private List<AgentController> _charactersSelected = new();
+        private List<AgentController> _playerAgents = new();
         private AgentController _selectedCharacter;
        
         
@@ -44,15 +45,14 @@ namespace _project.scripts.Input
 
         private void Start()
         {
-            GameManager.Instance.OnStateChangeEvent += SetPlayerAgents;
+            GameManager.Instance.OnAgentsInitialized += SetPlayerAgents;
+            GameManager.Instance.GameState.OnValueChanged += (_, newValue) => Debug.Log($"New GameState : {newValue}");
         }
 
-        private void SetPlayerAgents(EGameState state)
+        private void SetPlayerAgents(List<AgentController> agents)
         {
-            if(state != EGameState.Gameplay || _selectedCharacter != null)
-                return;
-
-            _selectedCharacter = FindObjectOfType<AgentController>();
+            _playerAgents = agents;
+            _selectedCharacter = _playerAgents[0];
         }
 
         private void OnEnable()
@@ -72,6 +72,8 @@ namespace _project.scripts.Input
 
         private void GetContextOrAction()
         {
+            if (_selectedCharacter == null) return;
+            
             Vector2 targetPosition = _tileSelection.WorldHighlightedTilePosition;
             Vector2Int clickedTile = GridUtils.WorldToGrid(targetPosition);
 

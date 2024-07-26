@@ -13,25 +13,22 @@ namespace _project.scripts.Network
 {
     public class Relay : MonoBehaviour
     {
-        private UnityTransport _transport;
+
+        public static Relay Singleton { get; private set; }
         
-        [SerializeField] private TMP_Text joinCodeText;
-        [SerializeField] private TMP_InputField joinInput;
-        
-        [SerializeField] private GameObject createbutton;
-        [SerializeField] private GameObject joinbutton;
-        
-        [SerializeField] private GameObject joinInputGameObject;
-        [SerializeField] private GameObject codeGameObject;
         [SerializeField] private GameObject canvas;
         
+        private UnityTransport _transport;
         private const int MaxPlayer = 2;
-        private bool isReady = false;
 
         private async void Awake()
         {
-            joinInputGameObject.SetActive(false);
-            codeGameObject.SetActive(false);
+            if (Singleton != null)
+            {
+                Destroy(this);
+            }
+
+            Singleton = this;
             _transport = FindObjectOfType<UnityTransport>();
 
             canvas.SetActive(false);
@@ -46,41 +43,23 @@ namespace _project.scripts.Network
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
         }
 
-        public async void CreateGame()
+        public async Task<string> CreateGame()
         {
-            joinbutton.SetActive(false);
-            codeGameObject.SetActive(true);
-
-            Allocation a = await RelayService.Instance.CreateAllocationAsync(MaxPlayer);
-            joinCodeText.text = await RelayService.Instance.GetJoinCodeAsync(a.AllocationId);
+            Allocation a = await RelayService.Instance.CreateAllocationAsync(MaxPlayer - 1);
             
             _transport.SetHostRelayData(a.RelayServer.IpV4, (ushort)a.RelayServer.Port, a.AllocationIdBytes, a.Key, a.ConnectionData);
             
             NetworkManager.Singleton.StartHost();
+            return await RelayService.Instance.GetJoinCodeAsync(a.AllocationId);
         }
         
-        public async void JoinGame()
+        public async void JoinGame(string joinCode)
         {
-            createbutton.SetActive(false);
-            joinInputGameObject.SetActive(true);
-            
-            JoinAllocation a = await RelayService.Instance.JoinAllocationAsync(joinInput.text);
+            JoinAllocation a = await RelayService.Instance.JoinAllocationAsync(joinCode);
             
             _transport.SetClientRelayData(a.RelayServer.IpV4, (ushort)a.RelayServer.Port, a.AllocationIdBytes, a.Key, a.ConnectionData, a.HostConnectionData);
             
             NetworkManager.Singleton.StartClient();
-        }
-
-        public void OnReadyClick()
-        {
-            isReady = !isReady;
-            if (!isReady) return;
-                
-            // TODO : 
-            // Ask server for each player connected if they are ready
-            // On the other side, we need to activate the ready button after game created or join. 
-            // And instantiate a game menu to set up the game's settings and lets the player prepare for it.
-            // OR maybe we can put the On ready in another UI because we don't need the relay anymore.
         }
     }
 }

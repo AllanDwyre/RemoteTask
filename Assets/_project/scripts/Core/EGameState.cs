@@ -4,8 +4,10 @@
     {
         InUI,
         Gameplay,
-        Replay,
+        
         Victory,
-        Defeat
+        Defeat,
+        
+        Replay,
     }
 }

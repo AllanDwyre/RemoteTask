@@ -18,5 +18,14 @@ namespace _project.scripts.utils
 
         public static Vector2 MousePosition => Mouse.current.position.ReadValue();
 
+        private static WaitForFixedUpdate _waitForFixedUpdate;
+        
+        /// <summary>
+        /// Reduce the garbage collector
+        /// </summary>
+        public static WaitForFixedUpdate WaitForFixedUpdate
+        {
+            get { return _waitForFixedUpdate ??= new WaitForFixedUpdate(); }
+        }
     }
 }

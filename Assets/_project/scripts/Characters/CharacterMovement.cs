@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using _project.scripts.commands;
 using _project.scripts.grid;
 using _project.scripts.pathfinding;
+using _project.scripts.utils;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -95,7 +96,7 @@ namespace _project.scripts.Characters
                     float step = moveSpeed * Time.deltaTime;
                     transform.position = Vector3.MoveTowards(transform.position, _moveToPosition, step);
 
-                    yield return new WaitForFixedUpdate();
+                    yield return Helper.WaitForFixedUpdate;
                 }
 
                 currentWaypointIndex++;
