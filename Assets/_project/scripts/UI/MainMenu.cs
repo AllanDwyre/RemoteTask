@@ -1,4 +1,6 @@
-﻿using DG.Tweening;
+﻿using System.Threading.Tasks;
+using _project.scripts.utils;
+using DG.Tweening;
 using TMPro;
 using Unity.Services.Relay;
 using UnityEngine;
@@ -13,7 +15,7 @@ namespace _project.scripts.UI
     {
 
         [SerializeField] private GameObject mainMenuCanvas;
-        [SerializeField] private GameObject preparationMenuCanvas;
+        [SerializeField] private Canvas preparationMenuCanvas;
         
         [SerializeField] private GameObject titleText;
         
@@ -21,14 +23,12 @@ namespace _project.scripts.UI
         [SerializeField] private GameObject joinButton;
         
         [SerializeField] private GameObject codesContainer;
-        [FormerlySerializedAs("createCodeText")] [SerializeField] private GameObject createCodeButton;
         [SerializeField] private GameObject joinCodeInput;
 
         private bool _hasClickedJoinOrCreateOnce;
 
         private void Start()
         {
-            
             DOTween.Init();
 
             titleText.transform.DOScale(2f, 2f)
@@ -40,21 +40,6 @@ namespace _project.scripts.UI
         {
             _hasClickedJoinOrCreateOnce = false;
             ResetMainMenu();
-        }
-
-        private void ResetMainMenu()
-        {
-            joinButton.SetActive(true);
-            createButton.SetActive(true);
-            FadeButton(joinButton,1,.5f);
-            FadeButton(createButton, 1, .5f);
-            
-            joinCodeInput.GetComponent<TMP_InputField>().text = "";
-            createCodeButton.GetComponentInChildren<TMP_Text>().text = "";
-            
-            codesContainer.GetComponent<RectTransform>().DOScaleX(0,0.5f);
-            createCodeButton.GetComponent<RectTransform>().DOScaleX(0,0.5f);
-            joinCodeInput.GetComponent<RectTransform>().DOScaleX(0,0.5f);
         }
         
         public void OnBackClicked()
@@ -68,59 +53,82 @@ namespace _project.scripts.UI
             ResetMainMenu();
         }
 
-        public void OnCopyCode()
-        {
-            GUIUtility.systemCopyBuffer = createCodeButton.GetComponentInChildren<TMP_Text>().text;
-        }
         
+
+        #region NetworkManagement
         public async void OnCreateClicked()
         {
             if (_hasClickedJoinOrCreateOnce) return;
             _hasClickedJoinOrCreateOnce = true;
   
-            createCodeButton.GetComponentInChildren<TMP_Text>().text = await Relay.Singleton.CreateGame();
+            string code = await Relay.Singleton.CreateGame();
+            if (code == null)
+            {
+                Debug.LogError("Server didn't start properly.");
+                _hasClickedJoinOrCreateOnce = false;
+            }
+            StartCoroutine(NetworkUtils.WaitForNetworkReady(() => PreparationUI(code)));
+        }
 
-            GameObject ui = Instantiate(preparationMenuCanvas);
+
+        public async void OnJoinClicked()
+        {
+            if (JoinUIAnimation()) return;
             
-            ui.GetComponent<PreparationUI>().Init(createCodeButton.GetComponentInChildren<TMP_Text>().text);
+            
+            string code = joinCodeInput.GetComponent<TMP_InputField>().text;
+            if (! await HasSuccessfullyJoined(code)) return;
+            StartCoroutine(NetworkUtils.WaitForNetworkReady(() => PreparationUI(code)));
+        }
+        private void PreparationUI(string code)
+        {
+            preparationMenuCanvas.enabled = true;
+            preparationMenuCanvas.GetComponent<PreparationUI>().Init(code);
             mainMenuCanvas.SetActive(false);
         }
-        
-        public void OnJoinClicked()
+        #endregion
+        #region Utils
+        private void ResetMainMenu()
         {
-            if (_hasClickedJoinOrCreateOnce)
-            {
-                if (!HasSuccessfullyJoined()) return;
-                GameObject ui = Instantiate(preparationMenuCanvas);
-                ui.GetComponent<PreparationUI>().Init(joinCodeInput.GetComponent<TMP_InputField>().text);
-                mainMenuCanvas.SetActive(false);
-                return;
-            }
-
-            _hasClickedJoinOrCreateOnce = true;
+            joinButton.SetActive(true);
+            createButton.SetActive(true);
+            FadeButton(joinButton,1,.25f);
+            FadeButton(createButton, 1, .25f);
             
-            FadeButton(createButton, 0, 1f).onComplete += () => createButton.SetActive(false);
-            joinCodeInput.GetComponent<RectTransform>().DOScaleX(1f, 1f);
-            codesContainer.GetComponent<RectTransform>().DOScaleX(1f, 1f);
+            joinCodeInput.GetComponent<TMP_InputField>().text = "";
+            
+            codesContainer.GetComponent<RectTransform>().DOScaleX(0,0.5f);
+            joinCodeInput.GetComponent<RectTransform>().DOScaleX(0,0.5f);
+        }
+        private bool JoinUIAnimation()
+        {
+            if (_hasClickedJoinOrCreateOnce) return false;
+            
+            createButton.SetActive(false);
+            joinCodeInput.GetComponent<RectTransform>().DOScaleX(1f, .25f);
+            codesContainer.GetComponent<RectTransform>().DOScaleX(1f, .25f);
+            _hasClickedJoinOrCreateOnce = true;
+            return true;
+
         }
 
-       
+
         private Tween FadeButton(GameObject button, float endValue, float duration)
         {
             
             button.GetComponent<Image>().DOFade(endValue, duration);
             return button.GetComponentInChildren<TMP_Text>().DOFade(endValue, duration);
         }
-        private bool HasSuccessfullyJoined()
+        
+        private async Task<bool> HasSuccessfullyJoined(string code )
         {
             try
             {
-                string code = joinCodeInput.GetComponent<TMP_InputField>().text;
                 if (code.IsNullOrEmpty())
                 {
                     return false;
                 }
-                Relay.Singleton.JoinGame(code);
+                return await Relay.Singleton.JoinGame(code);
             }
             catch (RelayServiceException relayServiceException)
             {
@@ -132,8 +140,7 @@ namespace _project.scripts.UI
                 Debug.LogError(relayServiceException);
                 return false;
             }
-
-            return true;
         }
+        #endregion
     }
 }

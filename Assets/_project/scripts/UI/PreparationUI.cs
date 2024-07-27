@@ -1,24 +1,13 @@
 ﻿using System.Collections.Generic;
-using _project.scripts.Core;
-using _project.scripts.Network;
 using DG.Tweening;
 using TMPro;
-using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace _project.scripts.UI
 {
-    public class PreparationUI : NetworkBehaviour
+    public class PreparationUI : MonoBehaviour
     {
-        // TODO : 
-        // Ask server for each player connected if they are ready
-        // On the other side, we need to activate the ready button after game created or join. 
-        // And instantiate a game menu to set up the game's settings and lets the player prepare for it.
-        // OR maybe we can put the On ready in another UI because we don't need the relay anymore.
-        [SerializeField] private ReadyState readyControls;
-
         [SerializeField] private TMP_Text partyCodeText;
         [SerializeField] private Image readyButton;
         [SerializeField] private TMP_Text numberOfConnectedPlayer;
@@ -27,58 +16,54 @@ namespace _project.scripts.UI
         [SerializeField] private Transform playersAvatarPrefab;
 
         private readonly Dictionary<ulong, Transform> _avatars = new();
+        private int _playerCount = 0;
+        private int _playerReadyCount = 0;
+
+        public void Init(string partyCode)
+        {
+            partyCodeText.text = partyCode;
+            
+        }
         
-        public NetworkVariable<bool> IsReady { get; private set; } = new(writePerm: NetworkVariableWritePermission.Owner);
-
-        public override void OnNetworkSpawn()
+        public void OnIsReadyChanged(bool isReady)
         {
-            NetworkManager.Singleton.OnClientConnectedCallback += OnPlayerConnected;
-            NetworkManager.Singleton.OnClientDisconnectCallback += OnPlayerDisconnected;
-            readyControls.NbOfReadyPeople.OnValueChanged += OnReadyChanged;
+            Color ready = new Color(1, 0.56f, 0);
+            Color notReady = new Color(0,0.83f, 1);
+            
+            readyButton.DOColor(isReady ? ready : notReady ,.3f);
         }
-
-        private void OnReadyChanged(int _, int value)
+        public void OnReadyCountChanged(int value)
         {
-            int playerTotal = NetworkManager.Singleton.ConnectedClients.Count;
-            numberOfReadyPlayer.text = $"{value}/{playerTotal} ready";
-            if (value == playerTotal)
-            {
-                
-                NetworkManager.Singleton.SceneManager.LoadScene("Gameplay", LoadSceneMode.Single);
-            }
+            _playerReadyCount = value;
+            numberOfReadyPlayer.text = $"{_playerReadyCount}/{_playerCount} ready";
         }
-
-        private void OnPlayerDisconnected(ulong id)
+        public void OnConnectedCountChanged(int value)
         {
-            numberOfConnectedPlayer.text = NetworkManager.Singleton.ConnectedClients.Count + "/2 players connected";
-            Destroy(_avatars[id].gameObject);
-            _avatars.Remove(id);
+            _playerCount = value;
+            numberOfConnectedPlayer.text = $"{_playerCount}/2 players connected";
         }
-
-        private void OnPlayerConnected(ulong id)
+        
+        public void OnPlayerConnected(ulong id)
         {
-            numberOfConnectedPlayer.text = NetworkManager.Singleton.ConnectedClients.Count + "/2 players connected";
             _avatars.Add(
                 id,
                 Instantiate(playersAvatarPrefab, playersAvatarContainer)
             );
         }
+        public void OnPlayerDisconnected(ulong id)
+        {
+            _avatars.Remove(id);
+        }
 
-        public void ToggleReadyState()
+        public void OnCountDown(int second)
         {
-            IsReady.Value = !IsReady.Value;
-            Color ready = new Color(1, 0.56f, 0);
-            Color notReady = new Color(0,0.83f, 1);
-            
-            readyButton.DOColor(IsReady.Value ? ready : notReady ,.3f);
+            numberOfReadyPlayer.text = $"The game start in {second} seconds...";
         }
-        
-        public void Init(string partyCode)
+        public void OnCountDownStop()
         {
-            GetComponent<NetworkObject>().Spawn(true);
-            partyCodeText.text = partyCode;
+            OnReadyCountChanged(_playerReadyCount);
         }
-        
+
         public void OnCopyCode()
         {
             GUIUtility.systemCopyBuffer = partyCodeText.text;

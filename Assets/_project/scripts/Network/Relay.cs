@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
@@ -30,7 +31,12 @@ namespace _project.scripts.Network
 
             Singleton = this;
             _transport = FindObjectOfType<UnityTransport>();
-
+            
+            if (_transport == null)
+            {
+                Debug.LogError("Not Transport Found !");
+            }
+            
             canvas.SetActive(false);
             await Authenticate();
             canvas.SetActive(true);
@@ -45,21 +51,31 @@ namespace _project.scripts.Network
 
         public async Task<string> CreateGame()
         {
-            Allocation a = await RelayService.Instance.CreateAllocationAsync(MaxPlayer - 1);
+            try
+            {
+                Allocation a = await RelayService.Instance.CreateAllocationAsync(MaxPlayer - 1);
             
-            _transport.SetHostRelayData(a.RelayServer.IpV4, (ushort)a.RelayServer.Port, a.AllocationIdBytes, a.Key, a.ConnectionData);
+                _transport.SetHostRelayData(a.RelayServer.IpV4, (ushort)a.RelayServer.Port, a.AllocationIdBytes, a.Key, a.ConnectionData);
+                
+                string joinCode = await RelayService.Instance.GetJoinCodeAsync(a.AllocationId);
+
+                return NetworkManager.Singleton.StartHost() ? joinCode : null;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+                throw;
+            }
             
-            NetworkManager.Singleton.StartHost();
-            return await RelayService.Instance.GetJoinCodeAsync(a.AllocationId);
         }
         
-        public async void JoinGame(string joinCode)
+        public async Task<bool> JoinGame(string joinCode)
         {
             JoinAllocation a = await RelayService.Instance.JoinAllocationAsync(joinCode);
             
             _transport.SetClientRelayData(a.RelayServer.IpV4, (ushort)a.RelayServer.Port, a.AllocationIdBytes, a.Key, a.ConnectionData, a.HostConnectionData);
             
-            NetworkManager.Singleton.StartClient();
+            return NetworkManager.Singleton.StartClient();
         }
     }
 }

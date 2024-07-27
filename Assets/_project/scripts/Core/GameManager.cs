@@ -46,7 +46,6 @@ namespace _project.scripts.Core
         public override void OnNetworkSpawn()
         {
             if(!IsHost) return;
-            NetworkManager.Singleton.OnClientConnectedCallback += InitializeClientOnConnection;
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnSceneLoaded;
             GameState.Value = stateOnStart;
         }
@@ -68,13 +67,9 @@ namespace _project.scripts.Core
         {
             GameState.Value = state;
         }
-        
+
         private void InitializeClientOnConnection(ulong clientId)
         {
-            Debug.Log($"{clientId} : is connected");
-            
-            OnPlayerConnection?.Invoke(clientId);
-            
             if( GameState.Value != EGameState.Gameplay) return;
 
             List<AgentController> agents = new List<AgentController>();
