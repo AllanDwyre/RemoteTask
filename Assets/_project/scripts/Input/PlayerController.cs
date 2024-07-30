@@ -8,7 +8,7 @@ using _project.scripts.utils;
 using Cinemachine;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem;
+using UnityEngine.Events;
 
 namespace _project.scripts.Input
 {
@@ -26,6 +26,13 @@ namespace _project.scripts.Input
         [SerializeField] private float zoomMultiplier = 0.01f;
         [SerializeField] private float smoothTime = 0.25f;
         private float _zoom, _velocity;
+
+        #region UnityEvents
+
+        public UnityEvent<GameObject> onSelection;
+        public UnityEvent onDeselection;
+
+        #endregion
         
         private TileSelection _tileSelection;
         private List<AgentController> _charactersSelected = new();
@@ -99,11 +106,15 @@ namespace _project.scripts.Input
             if (hit.collider != null)
             {
                 CharacterControllerBase character = hit.collider.GetComponent<CharacterControllerBase>();
-
+                onSelection?.Invoke(character.gameObject);
                 if (character != null && character is AgentController agent)
                 {
                     _selectedCharacter = agent;
                 }
+            }
+            else
+            {
+                onDeselection?.Invoke();
             }
         }
 

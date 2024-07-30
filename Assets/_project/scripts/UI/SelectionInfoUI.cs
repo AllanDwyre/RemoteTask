@@ -25,14 +25,14 @@ namespace _project.scripts.UI
             if (selection.TryGetComponent<CharacterControllerBase>(out var character))
             {
                 titleText.text = character.CharacterName;
-                HandleHealthUI(character.GetComponent<HealthSystem>());
+                HandleHealthUI(character.GetComponent<HealthComponent>());
 
                 currentTaskText.text = "Don't know yet";
                 currentTaskText.text = "Don't know yet";
                 return;
             }
             
-            if (selection.TryGetComponent<HealthSystem>(out HealthSystem healthComponent))
+            if (selection.TryGetComponent<HealthComponent>(out HealthComponent healthComponent))
             {
                 HandleHealthUI(healthComponent);
                 queueTasksText.text = "";
@@ -40,7 +40,7 @@ namespace _project.scripts.UI
             }
         }
 
-        private void HandleHealthUI(HealthSystem healthComp)
+        private void HandleHealthUI(HealthComponent healthComp)
         {
             
             float healthValue = Mathf.Clamp((float)healthComp.Health.Value / healthComp.MaxHealth, 0f, 1f);
