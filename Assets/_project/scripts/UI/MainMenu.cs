@@ -4,7 +4,6 @@ using DG.Tweening;
 using TMPro;
 using Unity.Services.Relay;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using WebSocketSharp;
 using Relay = _project.scripts.Network.Relay;
@@ -92,6 +91,8 @@ namespace _project.scripts.UI
         {
             joinButton.SetActive(true);
             createButton.SetActive(true);
+            joinCodeInput.SetActive(false);
+            
             FadeButton(joinButton,1,.25f);
             FadeButton(createButton, 1, .25f);
             
@@ -105,6 +106,7 @@ namespace _project.scripts.UI
             if (_hasClickedJoinOrCreateOnce) return false;
             
             createButton.SetActive(false);
+            joinCodeInput.SetActive(true);
             joinCodeInput.GetComponent<RectTransform>().DOScaleX(1f, .25f);
             codesContainer.GetComponent<RectTransform>().DOScaleX(1f, .25f);
             _hasClickedJoinOrCreateOnce = true;
@@ -112,15 +114,14 @@ namespace _project.scripts.UI
 
         }
 
-
-        private Tween FadeButton(GameObject button, float endValue, float duration)
+        private static void FadeButton(GameObject button, float endValue, float duration)
         {
             
             button.GetComponent<Image>().DOFade(endValue, duration);
-            return button.GetComponentInChildren<TMP_Text>().DOFade(endValue, duration);
+            button.GetComponentInChildren<TMP_Text>().DOFade(endValue, duration);
         }
         
-        private async Task<bool> HasSuccessfullyJoined(string code )
+        private static async Task<bool> HasSuccessfullyJoined(string code)
         {
             try
             {

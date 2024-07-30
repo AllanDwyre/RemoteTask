@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using _project.scripts.commands;
 using _project.scripts.grid;
 using _project.scripts.pathfinding;
 using _project.scripts.utils;
@@ -15,21 +14,21 @@ namespace _project.scripts.Characters
         
         [SerializeField] private float moveSpeed = 1f;
         [SerializeField] private Vector2 gridSize = Vector2.one;
-        [SerializeField] private ObstacleTileMap obstacleTileMap;
         
         public Vector2 TargetPosition { get; private set; }
 
+        private bool _isMoving;
+        private bool _hadCommand;
+        private ObstacleTileMap _obstacleTileMap;
         private Vector2 _moveToPosition;
         
-        private bool _isMoving = false;
-        private bool _hadCommand = false;
-        private MovementDirection _currentDirection = MovementDirection.North;
+        // private MovementDirection _currentDirection = MovementDirection.North;
         private Coroutine _currentCoroutine;
         private CharacterControllerBase _controllerBase;
 
         private void Awake()
         {
-            obstacleTileMap = FindObjectOfType<ObstacleTileMap>();
+            _obstacleTileMap = FindObjectOfType<ObstacleTileMap>();
             _controllerBase = GetComponent<CharacterControllerBase>();
         }
 
@@ -55,7 +54,7 @@ namespace _project.scripts.Characters
         {
             _hadCommand = true;
             
-            if (obstacleTileMap.IsTileObstacle(targetPosition) ||  (Vector2) targetPosition == Vector2Int.zero)
+            if (_obstacleTileMap.IsTileObstacle(targetPosition) ||  (Vector2) targetPosition == Vector2Int.zero)
             {
                 return;
             }
@@ -74,9 +73,9 @@ namespace _project.scripts.Characters
         private void FindPathToTargetPosition()
         {
             Vector2 startPosition = transform.position;
-            List<Vector2> path = AStar.FindPath(startPosition, TargetPosition, gridSize, obstacleTileMap.IsTileObstacle);
+            List<Vector2> path = AStar.FindPath(startPosition, TargetPosition, gridSize, _obstacleTileMap.IsTileObstacle);
 
-            if (path != null && path.Count > 0)
+            if (path is { Count: > 0 })
             {
                 _currentCoroutine = StartCoroutine(MoveAlongPath(path));
             }

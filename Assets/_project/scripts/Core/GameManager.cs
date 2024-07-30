@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using _project.scripts.Characters;
+using _project.scripts.Core.AlertSystem;
 using _project.scripts.Input;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 namespace _project.scripts.Core
 {
@@ -16,6 +16,8 @@ namespace _project.scripts.Core
         [SerializeField] private InputReader controls;
         [SerializeField] private GameObject agentPrefab;
         [SerializeField] private EGameState stateOnStart;
+
+        [SerializeField] private AlertScriptableObject testAlert;
 
         public static GameManager Instance;
 
@@ -48,6 +50,12 @@ namespace _project.scripts.Core
             if(!IsHost) return;
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnSceneLoaded;
             GameState.Value = stateOnStart;
+            if (GameState.Value == EGameState.Gameplay)
+            {
+                InitializeClientOnConnection(OwnerClientId);
+            }
+
+            AlertController.AddNewAlert(testAlert, new(5,15));
         }
 
         private void OnSceneLoaded(string scenename, LoadSceneMode loadscenemode, List<ulong> clientscompleted, List<ulong> clientstimedout)

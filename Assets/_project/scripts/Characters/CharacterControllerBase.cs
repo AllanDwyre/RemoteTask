@@ -1,23 +1,29 @@
 ﻿using System;
 using _project.scripts.commands;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace _project.scripts.Characters
 {
-        // A character have common system, like health, environnement effect, weapons or abilities(for animals) ...
+        // A character have common system, like health, environnement effect, weapons ...
         // So its here we will handle the logic for all that. Then the child classes can use it
-    public abstract class CharacterControllerBase : MonoBehaviour
+    public abstract class CharacterControllerBase : NetworkBehaviour
     {
         private readonly CommandManager _controller = new();
 
-        protected bool IsIdle
+        private bool HasPermission => IsOwner || IsOwnedByServer;
+        public abstract string CharacterName { get; protected set; }
+
+        private bool IsIdle
         {
             get;
-            private set;
+            set;
         } = true;
         
         public void HasFinishedCurrentTask()
         {
+            if(!HasPermission) return;
+            
             IsIdle = true;
             ExecuteNextCommand();
         }
@@ -32,36 +38,25 @@ namespace _project.scripts.Characters
 
         public void ExecuteCommand(ICommand command)
         {
+            if(!HasPermission) return;
+            
             if (!EvaluateCommand(command)) return;
 
             IsIdle = false;
             command.Execute();
         }
-        
-        public void ExecuteCommandWithoutEvaluate(ICommand command)
-        {
-            IsIdle = false;
-            command.Execute();
-        }
-        
-        public void ExecuteNextCommand()
+
+        private void ExecuteNextCommand()
         {
             var command = _controller.DequeueCommand();
             if (command == null || !EvaluateCommand(command)) return;
             IsIdle = false;
             command.Execute();
         }
-        
-        public void ExecuteNextCommandWithoutEvaluate()
-        {
-            var command = _controller.DequeueCommand();
-            if (command == null) return;
-            
-            IsIdle = false;
-            command.Execute();
-        }
+
         public void AddCommand(ICommand command)
         {
+            if(!HasPermission) return;
             _controller.AddCommand(command);
         }
     }

@@ -5,7 +5,7 @@ namespace _project.scripts.commands
 {
     public class CommandManager
     {
-        private Queue<ICommand> _commands = new Queue<ICommand>();
+        private readonly Queue<ICommand> _commands = new Queue<ICommand>();
 
         public int Count => _commands.Count;
         
