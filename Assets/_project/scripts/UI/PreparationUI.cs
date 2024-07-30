@@ -16,13 +16,12 @@ namespace _project.scripts.UI
         [SerializeField] private Transform playersAvatarPrefab;
 
         private readonly Dictionary<ulong, Transform> _avatars = new();
-        private int _playerCount = 0;
-        private int _playerReadyCount = 0;
+        private int _playerCount;
+        private int _playerReadyCount;
 
         public void Init(string partyCode)
         {
             partyCodeText.text = partyCode;
-            
         }
         
         public void OnIsReadyChanged(bool isReady)
@@ -37,19 +36,22 @@ namespace _project.scripts.UI
             _playerReadyCount = value;
             numberOfReadyPlayer.text = $"{_playerReadyCount}/{_playerCount} ready";
         }
-        public void OnConnectedCountChanged(int value)
+        public void OnConnectedCountChanged(int idCount)
         {
-            _playerCount = value;
+            _playerCount = idCount;
             numberOfConnectedPlayer.text = $"{_playerCount}/2 players connected";
+            for (int i = 0; i < idCount; i++)
+            {
+                if (_avatars.ContainsKey((ulong)i)) continue;
+                
+                _avatars.Add(
+                    (ulong)i,
+                    Instantiate(playersAvatarPrefab, playersAvatarContainer)
+                );
+            }
         }
         
-        public void OnPlayerConnected(ulong id)
-        {
-            _avatars.Add(
-                id,
-                Instantiate(playersAvatarPrefab, playersAvatarContainer)
-            );
-        }
+
         public void OnPlayerDisconnected(ulong id)
         {
             _avatars.Remove(id);

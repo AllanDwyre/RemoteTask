@@ -4,7 +4,6 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 namespace _project.scripts.Network
 {
@@ -12,9 +11,8 @@ namespace _project.scripts.Network
     {
 
         #region Unity Events
-        public UnityEvent<ulong> onConnectedPlayer;
         public UnityEvent<ulong> onDisconnectedPlayer;
-        [FormerlySerializedAs("onConnectedPlayerChanged")] public UnityEvent<int> onConnectedPlayerCountChanged;
+        public UnityEvent<int> onConnectedPlayerCountChanged;
         public UnityEvent<int> onReadyPlayerChanged;
         public UnityEvent<bool> onIsReadyChange;
         public UnityEvent<int> onCountdownStart;
@@ -65,24 +63,23 @@ namespace _project.scripts.Network
             ReadyCount.Value = Mathf.Max(0, count);
         }
         
-        private void OnConnectedChanged(ulong id)
-        {
-            UpdatePlayerCountServerRpc(id);
-        }
         private void OnDisconnectedChanged(ulong id)
         {
             onDisconnectedPlayer?.Invoke(id);
         }
-        [ServerRpc]
-        private void UpdatePlayerCountServerRpc(ulong id)
+        private void OnConnectedChanged(ulong id)
         {
-            UpdatePlayerCountClientRpc(NetworkManager.Singleton.ConnectedClients.Count,id);
+            UpdatePlayerCountServerRpc();
+        }
+        [ServerRpc]
+        private void UpdatePlayerCountServerRpc()
+        {
+            UpdatePlayerCountClientRpc(NetworkManager.Singleton.ConnectedClients.Count);
         }
         
         [ClientRpc]
-        private void UpdatePlayerCountClientRpc(int connectedClients, ulong id)
+        private void UpdatePlayerCountClientRpc(int connectedClients)
         {
-            onConnectedPlayer?.Invoke(id);
             ConnectedPlayers = connectedClients;
             onConnectedPlayerCountChanged?.Invoke(ConnectedPlayers);
         }
