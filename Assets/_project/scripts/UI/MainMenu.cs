@@ -1,20 +1,16 @@
-﻿using System.Threading.Tasks;
-using _project.scripts.utils;
+﻿using System;
+using _project.scripts.Utils;
 using DG.Tweening;
 using TMPro;
-using Unity.Services.Relay;
 using UnityEngine;
 using UnityEngine.UI;
-using WebSocketSharp;
-using Relay = _project.scripts.Network.Relay;
+
 
 namespace _project.scripts.UI
 {
     public class MainMenu : MonoBehaviour
     {
-
         [SerializeField] private GameObject mainMenuCanvas;
-        [SerializeField] private Canvas preparationMenuCanvas;
         
         [SerializeField] private GameObject titleText;
         
@@ -25,7 +21,9 @@ namespace _project.scripts.UI
         [SerializeField] private GameObject joinCodeInput;
 
         private bool _hasClickedJoinOrCreateOnce;
-
+        public static event Action<string,Action> OnPartyJoin;
+        public static event Action<Action> OnPartyCreated;
+        public static event Action OnNetworkInit;
         private void Start()
         {
             DOTween.Init();
@@ -35,10 +33,14 @@ namespace _project.scripts.UI
                 .SetEase(Ease.InOutQuad);
         }
 
+        private void OnDestroy()
+        {
+            DOTween.Kill(titleText.transform);
+        }   
+
         private void OnEnable()
         {
             _hasClickedJoinOrCreateOnce = false;
-            ResetMainMenu();
         }
         
         public void OnBackClicked()
@@ -52,39 +54,25 @@ namespace _project.scripts.UI
             ResetMainMenu();
         }
 
-        
-
         #region NetworkManagement
-        public async void OnCreateClicked()
+        public void OnCreateClicked()
         {
             if (_hasClickedJoinOrCreateOnce) return;
             _hasClickedJoinOrCreateOnce = true;
-  
-            string code = await Relay.Singleton.CreateGame();
-            if (code == null)
-            {
-                Debug.LogError("Server didn't start properly.");
-                _hasClickedJoinOrCreateOnce = false;
-            }
-            StartCoroutine(NetworkUtils.WaitForNetworkReady(() => PreparationUI(code)));
+            OnPartyCreated?.Invoke(OnSuccess);
         }
-
-
-        public async void OnJoinClicked()
+        public void OnJoinClicked()
         {
             if (JoinUIAnimation()) return;
-            
-            
             string code = joinCodeInput.GetComponent<TMP_InputField>().text;
-            if (! await HasSuccessfullyJoined(code)) return;
-            StartCoroutine(NetworkUtils.WaitForNetworkReady(() => PreparationUI(code)));
+            OnPartyJoin?.Invoke(code, OnSuccess);
         }
-        private void PreparationUI(string code)
+
+        private void OnSuccess()
         {
-            preparationMenuCanvas.enabled = true;
-            preparationMenuCanvas.GetComponent<PreparationUI>().Init(code);
-            mainMenuCanvas.SetActive(false);
+            StartCoroutine(NetworkUtils.WaitForNetworkReady(() => OnNetworkInit?.Invoke()));
         }
+
         #endregion
         #region Utils
         private void ResetMainMenu()
@@ -113,34 +101,10 @@ namespace _project.scripts.UI
             return true;
 
         }
-
         private static void FadeButton(GameObject button, float endValue, float duration)
         {
-            
             button.GetComponent<Image>().DOFade(endValue, duration);
             button.GetComponentInChildren<TMP_Text>().DOFade(endValue, duration);
-        }
-        
-        private static async Task<bool> HasSuccessfullyJoined(string code)
-        {
-            try
-            {
-                if (code.IsNullOrEmpty())
-                {
-                    return false;
-                }
-                return await Relay.Singleton.JoinGame(code);
-            }
-            catch (RelayServiceException relayServiceException)
-            {
-                if (relayServiceException.Reason == RelayExceptionReason.EntityNotFound)
-                {
-                    // TODO : Let's the player know
-                    
-                }
-                Debug.LogError(relayServiceException);
-                return false;
-            }
         }
         #endregion
     }

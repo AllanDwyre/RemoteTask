@@ -14,9 +14,9 @@ namespace _project.scripts.UI
 
         private Vector2 _location;
         
-        public void Init(Color alertColor, AlertScriptableObject alertInfo, Vector2 position)
+        public void Init(Color alertColor, AlertSettings alertInfo, Vector2 position)
         {
-            _title.text = alertInfo.title;
+            _title.text = alertInfo.Title;
             // _description.text = alertInfo.description;
             _box.color = alertColor;
             _location = position;

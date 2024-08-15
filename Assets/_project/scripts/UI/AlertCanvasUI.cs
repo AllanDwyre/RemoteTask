@@ -21,13 +21,13 @@ namespace _project.scripts.UI
 
         private void Awake()
         {
-            AlertController.NewAlert += AddNewAlert;
+            AlertHandler.NewAlert += AddNewAlert;
         }
 
-        public void AddNewAlert(AlertScriptableObject alertInfo, Vector2 position)
+        public void AddNewAlert(AlertSettings alertInfo, Vector2 position)
         {
             var alert =  Instantiate(alertPrefab, transform);
-            if (TryToGetByKey(alertInfo.type, out Color alertColor))
+            if (TryToGetByKey(alertInfo.Type, out Color alertColor))
             {
                 alert.GetComponent<AlertUI>().Init(alertColor, alertInfo, position);
             }

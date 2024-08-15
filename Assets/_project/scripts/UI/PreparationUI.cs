@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -36,10 +37,14 @@ namespace _project.scripts.UI
             _playerReadyCount = value;
             numberOfReadyPlayer.text = $"{_playerReadyCount}/{_playerCount} ready";
         }
+        
         public void OnConnectedCountChanged(int idCount)
         {
             _playerCount = idCount;
-            numberOfConnectedPlayer.text = $"{_playerCount}/2 players connected";
+
+            readyButton.GetComponentInChildren<TMP_Text>().text = _playerCount == 1 ? "Start" : "Ready";
+            numberOfConnectedPlayer.text = _playerCount == 1 ? "" :$"{_playerCount}/2 players connected";
+            
             for (int i = 0; i < idCount; i++)
             {
                 if (_avatars.ContainsKey((ulong)i)) continue;

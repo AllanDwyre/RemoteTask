@@ -1,5 +1,5 @@
-﻿using System;
-using _project.scripts.Characters;
+﻿using _project.scripts.Characters;
+using _project.scripts.Core.HealthSystem;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -22,7 +22,7 @@ namespace _project.scripts.UI
         public void OnSelection(GameObject selection)
         {
             GetComponent<Canvas>().enabled = true;
-            if (selection.TryGetComponent<CharacterControllerBase>(out var character))
+            if (selection.TryGetComponent<CharacterBase>(out var character))
             {
                 titleText.text = character.CharacterName;
                 HandleHealthUI(character.GetComponent<HealthComponent>());
