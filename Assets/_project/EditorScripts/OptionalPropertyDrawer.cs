@@ -25,7 +25,6 @@ namespace _project.Editor
             
             position.x += position.width + 24;
             position.width = position.height = EditorGUI.GetPropertyHeight(enableProperty);
-            EditorGUI.PropertyField(position, valueProperty, label, true);
             position.x -= position.width;
             EditorGUI.PropertyField(position, enableProperty, GUIContent.none);
 
