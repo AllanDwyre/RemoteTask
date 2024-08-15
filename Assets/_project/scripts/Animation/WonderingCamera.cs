@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using _project.scripts.utils;
+using _project.scripts.Utils;
 using UnityEngine;
 
 namespace _project.scripts.Animation
