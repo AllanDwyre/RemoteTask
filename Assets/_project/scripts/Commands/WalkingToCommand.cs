@@ -6,9 +6,9 @@ namespace _project.scripts.commands
     public class WalkingToCommand : ICommand
     {
         public Vector2Int ToPosition { get; private set;}
-        public CharacterMovement Receiver { get; private set;}
+        public MovementComponent Receiver { get; private set;}
 
-        public WalkingToCommand(Vector2Int toPosition, CharacterMovement receiver)
+        public WalkingToCommand(Vector2Int toPosition, MovementComponent receiver)
         {
             ToPosition = toPosition;
             Receiver = receiver;
@@ -16,7 +16,6 @@ namespace _project.scripts.commands
 
         public void Execute()
         {
-            Debug.Log("Executed");
             Receiver.MoveToTarget(ToPosition);
         }
     }

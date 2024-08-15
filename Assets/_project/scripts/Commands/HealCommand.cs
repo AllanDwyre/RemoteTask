@@ -1,4 +1,4 @@
-﻿using _project.scripts.Characters;
+﻿using _project.scripts.Core.HealthSystem;
 
 namespace _project.scripts.commands
 {
