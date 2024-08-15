@@ -1,37 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using _project.scripts.Core.GameFlow;
 using _project.scripts.Characters;
-using _project.scripts.Core.AlertSystem;
+using _project.scripts.Core.GameFlow.States;
 using _project.scripts.Input;
+using _project.scripts.UI;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace _project.scripts.Core
 {
+    
     public class GameManager : NetworkBehaviour
     {
-        private const int MaxAgentPerPlayer = 2;
-        
-        [SerializeField] private InputReader controls;
-        [SerializeField] private GameObject agentPrefab;
-        [SerializeField] private EGameState stateOnStart;
+        public static int MaxAgent => 1;
 
-        [SerializeField] private AlertScriptableObject testAlert;
+        [field: SerializeField] public InputReader Controls { get; private set; }
+        [SerializeField] private GameObject agentPrefab;
+        [SerializeField] public bool forceGameplay;
 
         public static GameManager Instance;
+        public static GameStateMachine StateMachine { get; private set; }
 
-        public NetworkVariable<EGameState> GameState { get; private set; } =
-            new(writePerm: NetworkVariableWritePermission.Owner);
 
-        #region Events
-
-        public event Action<List<AgentController>> OnAgentsInitialized; 
-        public event Action<ulong> OnPlayerConnection; 
-        
-
-        #endregion
-        
+        private string _partyCode;
         private void Awake()
         {
             if (Instance == null)
@@ -40,57 +31,65 @@ namespace _project.scripts.Core
             }
             else
             {
-                Destroy(this);
+                Destroy(gameObject);
             }
             DontDestroyOnLoad(this);
+            // get the loaded scene named Gameplay, bc the first scene is the bootstrapper
+            forceGameplay = SceneManager.GetSceneAt(1).name == "Gameplay"; 
+        }
+
+        private void Start()
+        {
+            if (!forceGameplay)
+            {
+                StateMachine = new GameStateMachine(new MainMenuState(), Controls);
+            }
         }
 
         public override void OnNetworkSpawn()
         {
             if(!IsHost) return;
-            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnSceneLoaded;
-            GameState.Value = stateOnStart;
-            if (GameState.Value == EGameState.Gameplay)
-            {
-                InitializeClientOnConnection(OwnerClientId);
-            }
-
-            AlertController.AddNewAlert(testAlert, new(5,15));
-        }
-
-        private void OnSceneLoaded(string scenename, LoadSceneMode loadscenemode, List<ulong> clientscompleted, List<ulong> clientstimedout)
-        {
-            if (scenename == "Gameplay")
-            {
-                GameState.Value = EGameState.Gameplay;
-                foreach (var id in clientscompleted)
-                {
-                    InitializeClientOnConnection(id);
-                }
-            }
             
-        }
-
-        public void SetGameState(EGameState state)
-        {
-            GameState.Value = state;
-        }
-
-        private void InitializeClientOnConnection(ulong clientId)
-        {
-            if( GameState.Value != EGameState.Gameplay) return;
-
-            List<AgentController> agents = new List<AgentController>();
-            for (int i = 0; i < MaxAgentPerPlayer; i++)
+            if (forceGameplay)
             {
-                // TODO : We need to instantiate the agent in an aware way of the environment and the obstacle (like the agent it-self). And may be look into spawner tiles in map 
-                GameObject agent = Instantiate(agentPrefab);
-                agent.name = $"agent {i} p:{clientId}";
-                agent.GetComponent<NetworkObject>().SpawnWithOwnership(clientId, true);
-                agents.Add(agent.GetComponent<AgentController>());
+                StateMachine = new GameStateMachine(new GameplayInitializeState(forceGameplay), Controls);
             }
-            OnAgentsInitialized?.Invoke(agents);
         }
-       
+
+        private void Update()
+        {
+            StateMachine?.Update();
+        }
+
+        public Agent InstantiateAgents(ulong clientId, int i)
+        {
+            GameObject agent = Instantiate(agentPrefab);
+            agent.name = $"agent {i} p:{clientId}";
+            agent.GetComponent<NetworkObject>().SpawnWithOwnership(clientId, true);
+            return agent.GetComponent<Agent>();
+        }
+
+        /// <summary>
+        /// The game over menu is open, it's determine the winner or looser
+        /// </summary>
+        /// <param name="looser">The one who failed the mission</param>
+        public void PlayerEndOfGame(ulong looser)
+        {
+            // Here because of network needs (to run on each client) ClientRCP
+            StateMachine.QueueNextState(new OnGameOverState(NetworkManager.Singleton.LocalClientId == looser));
+        }
+
+        public void SetPartyCode(string code)
+        {
+            _partyCode = code;
+        }
+
+        public void InitPreparationUI()
+        {
+            var prep = FindObjectOfType<PreparationUI>();
+            if (prep == null) return;
+            
+            prep.Init(_partyCode);
+        }
     }
 }
