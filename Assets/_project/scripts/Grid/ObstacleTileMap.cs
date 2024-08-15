@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.Tilemaps;
 
 namespace _project.scripts.grid
 {
     public class ObstacleTileMap : MonoBehaviour
     {
-        [SerializeField] private Tilemap _tilemap;
-        private HashSet<Vector3Int> _obstacleTilePosition = new HashSet<Vector3Int>();
+        [FormerlySerializedAs("_tilemap")] [SerializeField] private Tilemap tilemap;
+        private readonly HashSet<Vector3Int> _obstacleTilePosition = new HashSet<Vector3Int>();
 
         private void Awake()
         {
-            if (_tilemap == null)
+            if (tilemap == null)
             {
-                _tilemap = GetComponent<Tilemap>();
+                tilemap = GetComponent<Tilemap>();
             }
 
             InitializeObstacleTiles();
@@ -24,8 +24,8 @@ namespace _project.scripts.grid
         {
             _obstacleTilePosition.Clear();
 
-            BoundsInt bounds = _tilemap.cellBounds;
-            TileBase[] allTiles = _tilemap.GetTilesBlock(bounds);
+            BoundsInt bounds = tilemap.cellBounds;
+            TileBase[] allTiles = tilemap.GetTilesBlock(bounds);
 
             for (int x = 0; x < bounds.size.x; x++)
             {
@@ -41,6 +41,6 @@ namespace _project.scripts.grid
             }
         }
 
-        public bool IsTileObstacle(Vector2 position) => _obstacleTilePosition.Contains(_tilemap.WorldToCell(position));
+        public bool IsTileObstacle(Vector2 position) => _obstacleTilePosition.Contains(tilemap.WorldToCell(position));
     }
 }
