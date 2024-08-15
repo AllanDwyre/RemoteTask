@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e47ba462b2bf4d1b9138ffd240efed25, type: 3}
+  m_Name: Pistol
+  m_EditorClassIdentifier: 
+  weaponName: Pistol
+  sprite: {fileID: -101647956, guid: d85f9a590cffc8a468f154e61e19515f, type: 3}
+  caliberSo: {fileID: 11400000, guid: 2c1181d6cfbc3c749841ae9f98e18f50, type: 2}
+  maxRange: 12
+  isSecondaryWeapon: 1
+  muzzlePoint: {x: 0, y: 0, z: 0}
+  warmUp: 0.9
+  cooldown: 1
+  reloadTime: 3
+  spread: 0.1
+  sway: 2
+  stoppingPower:
+    value: 0
+    enable: 0
+  burstCount: 1
+  burst: 0

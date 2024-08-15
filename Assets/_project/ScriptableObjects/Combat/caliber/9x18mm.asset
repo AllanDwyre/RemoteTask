@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d34fe6b65ed44681ba7af74b34412f1b, type: 3}
+  m_Name: 9x18mm
+  m_EditorClassIdentifier: 
+  sprite: {fileID: 1889508351, guid: d85f9a590cffc8a468f154e61e19515f, type: 3}
+  damageAmount: 5
+  penetrationAmount: 10
+  caliberName: 9x18mm
+  bulletSpeed: 1
