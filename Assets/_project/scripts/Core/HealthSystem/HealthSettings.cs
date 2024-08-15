@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace _project.scripts.Characters
+namespace _project.scripts.Core.HealthSystem
 {
     [CreateAssetMenu(menuName = "ScriptableObject/Character", fileName = "HealthSettings")]
     public class HealthSettings : ScriptableObject

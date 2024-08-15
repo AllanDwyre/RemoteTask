@@ -1,20 +1,26 @@
-﻿using System.Collections;
-using _project.scripts.utils;
+﻿using System;
+using System.Collections;
+using _project.scripts.Utils;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-namespace _project.scripts.Characters
+namespace _project.scripts.Core.HealthSystem
 {
     public class HealthComponent : NetworkBehaviour
     {
         [SerializeField] private HealthSettings _settings;
         public  NetworkVariable<int> Health { get; private set; } = new();
         public  int  MaxHealth{ get; private set; }
+        
+        public EHealthStatus HealthStatus { get; private set; }
+
+        public event Action OnDeath;
 
         public override void OnNetworkSpawn()
         {
+            // please remove the error
             MaxHealth = _settings.health;
+            HealthStatus = EHealthStatus.Alive;
             if (!IsServer) return;
             Health.Value = _settings.health;
         }
@@ -27,6 +33,7 @@ namespace _project.scripts.Characters
         
         public void SetDamage(int damageValue)
         {
+            if (HealthStatus == EHealthStatus.Dead) return;
             ChangeHealthServerRpc(-damageValue);
         }
 
@@ -39,10 +46,10 @@ namespace _project.scripts.Characters
         public void HealUntilMax(int healStep, int healingTime)
         {
             if (Health.Value <= 0) return;
-            StartCoroutine(HealUntilMaxCorountine(healStep, healingTime));
+            StartCoroutine(HealUntilMaxCoroutine(healStep, healingTime));
         }
 
-        private IEnumerator HealUntilMaxCorountine(int healStep, int healingTime)
+        private IEnumerator HealUntilMaxCoroutine(int healStep, int healingTime)
         {
             while (Health.Value != MaxHealth)
             {
@@ -62,7 +69,9 @@ namespace _project.scripts.Characters
         [ClientRpc]
         private void DeathClientRpc()
         {
-            Debug.Log($"<color=red>Agent is dead</color>");
+            HealthStatus = EHealthStatus.Dead;
+            OnDeath?.Invoke();
+            Debug.Log($"<color=red>{name} is dead</color>");
         }
         
         [ServerRpc(RequireOwnership = false)]
@@ -72,6 +81,11 @@ namespace _project.scripts.Characters
             if (Health.Value <= 0)
             {
                 DeathClientRpc();
+            }
+
+            if (value < 0)
+            {
+               // _damageFlash.StartDamageFlash();
             }
         }
         

@@ -1,17 +1,32 @@
-﻿
+﻿using System;
 using _project.scripts.commands;
 
 namespace _project.scripts.Characters
 {
-    public class AgentController : CharacterControllerBase
+    public class Agent : CharacterBase
     {
         // handle the connections of different system of the agent : like health, movement, firing. It Can do more that just give the orders. It will have the logic of permissions 
         // example : We have the command "Walking To", we can check the health(or if he is stunt) and determine if he is capable to go there.
         
         // He needs to handle also the information to give, like the name, health, medical property to a giver player. For instance if it's an enemy player, we only need to give non-restrain information 
-
-
         public override string CharacterName { get; protected set; } = "Agent";
+        public override int Faction { get; protected set; }
+        
+        /// <summary>
+        /// OnAgentLoose takes the agent owner
+        /// </summary>
+        public static event Action<ulong> OnAgentLoose;
+        private void Start()
+        {
+            string[] names = new[] { "Eva", "Ronaldo", "Victor", "Alexander", "Ramsès", "Gregorio", "Spartacus"};
+            CharacterName = HasPermission ? names[UnityEngine.Random.Range(0, names.Length)] : "Enemy Agent";
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+            Faction = (int) NetworkManager.LocalClientId;
+        }
 
         protected override bool EvaluateCommand(ICommand command)
         {
@@ -27,6 +42,12 @@ namespace _project.scripts.Characters
             if (walkingToCommand.ToPosition == walkingToCommand.Receiver.TargetPosition) return false;
 
             return true;
+        }
+
+        protected override void OnCharacterDeath()
+        {
+            base.OnCharacterDeath();
+            OnAgentLoose?.Invoke(OwnerClientId);
         }
     }
 }
