@@ -2,7 +2,7 @@
 using System.Collections;
 using Unity.Netcode;
 
-namespace _project.scripts.utils
+namespace _project.scripts.Utils
 {
     public static class NetworkUtils
     {
