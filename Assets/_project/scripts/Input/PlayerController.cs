@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
 using _project.scripts.Characters;
 using _project.scripts.commands;
-using _project.scripts.Core;
 using _project.scripts.grid;
-using _project.scripts.utils;
+using _project.scripts.Utils;
 using Cinemachine;
 using Unity.Netcode;
 using UnityEngine;
@@ -12,11 +10,17 @@ using UnityEngine.Events;
 
 namespace _project.scripts.Input
 {
+    /// <summary>
+    /// - Split concerns (camera movement, orders, selections)
+    /// - ISelectable
+    /// - smart order system
+    /// </summary>
     [RequireComponent(typeof(CinemachineVirtualCamera))]
     public class PlayerController : NetworkBehaviour
     {
         [Header("Input Dependency")]
         [SerializeField] private InputReader controls;
+        [SerializeField] private Transform darkenScreen;
 
         [Header("CameraSettings")]
         [SerializeField] private float speed = 2f;
@@ -35,11 +39,8 @@ namespace _project.scripts.Input
         #endregion
         
         private TileSelection _tileSelection;
-        private List<AgentController> _charactersSelected = new();
-        private List<AgentController> _playerAgents = new();
-        private AgentController _selectedCharacter;
-       
-        
+        private List<Agent> _charactersSelected = new();
+        private Agent _selectedCharacter;
         private CinemachineVirtualCamera _camera;
         private float _scroll;
         private Vector2 _movement;
@@ -49,19 +50,6 @@ namespace _project.scripts.Input
             _camera = GetComponent<CinemachineVirtualCamera>();
             _tileSelection = FindObjectOfType<TileSelection>();
         }
-
-        private void Start()
-        {
-            GameManager.Instance.OnAgentsInitialized += SetPlayerAgents;
-            GameManager.Instance.GameState.OnValueChanged += (_, newValue) => Debug.Log($"New GameState : {newValue}");
-        }
-
-        private void SetPlayerAgents(List<AgentController> agents)
-        {
-            _playerAgents = agents;
-            _selectedCharacter = _playerAgents[0];
-        }
-
         private void OnEnable()
         {
             controls.QueueActionEvent += QueueAction;
@@ -70,13 +58,13 @@ namespace _project.scripts.Input
             controls.MoveEvent += HandleMovement;
             controls.ZoomEvent += HandleZoom;
         }
-
         private void Update()
         {
             Zoom();
             Move();
         }
 
+        
         private void GetContextOrAction()
         {
             if (_selectedCharacter == null) return;
@@ -84,16 +72,15 @@ namespace _project.scripts.Input
             Vector2 targetPosition = _tileSelection.WorldHighlightedTilePosition;
             Vector2Int clickedTile = GridUtils.WorldToGrid(targetPosition);
 
-            var command = new WalkingToCommand(clickedTile, _selectedCharacter.GetComponent<CharacterMovement>());
+            var command = new WalkingToCommand(clickedTile, _selectedCharacter.GetComponent<MovementComponent>());
             _selectedCharacter.ExecuteCommand(command);
         }
-        
         private void QueueAction()
         {
             Vector2 targetPosition = _tileSelection.WorldHighlightedTilePosition;
             Vector2Int clickedTile = GridUtils.WorldToGrid(targetPosition);
             
-            var command = new WalkingToCommand(clickedTile, _selectedCharacter.GetComponent<CharacterMovement>());
+            var command = new WalkingToCommand(clickedTile, _selectedCharacter.GetComponent<MovementComponent>());
             _selectedCharacter.AddCommand(command);
         }
 
@@ -103,11 +90,10 @@ namespace _project.scripts.Input
             Vector2 mousePosition = Helper.Camera.ScreenToWorldPoint(Helper.MousePosition);
             RaycastHit2D hit = Physics2D.CircleCast(mousePosition, .5f, Vector2.zero);
 
-            if (hit.collider != null)
+            if (hit.collider != null && hit.collider.TryGetComponent(out CharacterBase character))
             {
-                CharacterControllerBase character = hit.collider.GetComponent<CharacterControllerBase>();
                 onSelection?.Invoke(character.gameObject);
-                if (character != null && character is AgentController agent)
+                if (character != null && character is Agent agent)
                 {
                     _selectedCharacter = agent;
                 }
@@ -117,7 +103,6 @@ namespace _project.scripts.Input
                 onDeselection?.Invoke();
             }
         }
-
         private void HandleZoom(float scroll) => _scroll = scroll;
         private void HandleMovement(Vector2 movement) => _movement = movement;
         private void Zoom()
@@ -126,8 +111,8 @@ namespace _project.scripts.Input
             _zoom = Mathf.Clamp(value: _zoom, minZoom, maxZoom);
             _camera.m_Lens.OrthographicSize =
                 Mathf.SmoothDamp(_camera.m_Lens.OrthographicSize, _zoom, ref _velocity, smoothTime);
+            darkenScreen.localScale = Vector3.one * (_camera.m_Lens.OrthographicSize * 30f);
         }
-
         private void Move()
         {
             float speedMultiplierRatio = (_zoom - minZoom) / maxZoom + 1;

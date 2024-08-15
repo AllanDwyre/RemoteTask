@@ -1,15 +1,15 @@
-﻿using System.Collections;
-using _project.scripts.utils;
+﻿using System;
+using System.Collections;
+using _project.scripts.Utils;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.SceneManagement;
 
 namespace _project.scripts.Network
 {
     public class PreparationNetwork : NetworkBehaviour
     {
-
+        [SerializeField] private int secondsAfterReady = 10;
         #region Unity Events
         public UnityEvent<ulong> onDisconnectedPlayer;
         public UnityEvent<int> onConnectedPlayerCountChanged;
@@ -22,14 +22,16 @@ namespace _project.scripts.Network
         public NetworkVariable<int> ReadyCount { get; private set; } = new(writePerm: NetworkVariableWritePermission.Owner);
         public int ConnectedPlayers { get; private set; }
 
-        private bool _isReady = false;
+        private bool _isReady;
         private Coroutine _countdownCoroutine;
-        
+
+        public static event Action OnGameStarted;
         public override void OnNetworkSpawn()
         {
             ReadyCount.OnValueChanged += OnReadyChange;
             if (!IsOwner) return;
             
+            UpdatePlayerCountServerRpc();
             NetworkManager.Singleton.OnClientConnectedCallback += OnConnectedChanged;
             NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnectedChanged;
         }
@@ -39,6 +41,7 @@ namespace _project.scripts.Network
             onReadyPlayerChanged?.Invoke(newValue);
             if (ReadyCount.Value == ConnectedPlayers)
             {
+                secondsAfterReady = ConnectedPlayers == 1 ? 3 : secondsAfterReady;
                 _countdownCoroutine = StartCoroutine(CountDownGameStart());
             }
             else if (previousValue >= ConnectedPlayers && newValue < ConnectedPlayers)
@@ -86,12 +89,12 @@ namespace _project.scripts.Network
         
         private IEnumerator CountDownGameStart()
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < secondsAfterReady; i++)
             {
-                onCountdownStart?.Invoke(10 - i);
+                onCountdownStart?.Invoke(secondsAfterReady - i);
                 yield return Helper.WaitForSeconds(1);
             }
-            NetworkManager.Singleton.SceneManager.LoadScene("Gameplay", LoadSceneMode.Single);
+            OnGameStarted?.Invoke();
         }
     }
 }

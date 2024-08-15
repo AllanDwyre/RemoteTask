@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using _project.scripts.grid;
 using UnityEngine;
 
@@ -12,32 +11,32 @@ namespace _project.scripts.pathfinding
 {
     public static class AStar
     {
-        private static Vector2 gridSize;
+        private static Vector2 _gridSize;
         
         private class Node
         {
-            public Vector2Int position;
-            public Node parent;
-            public int gCost;
-            public int hCost;
+            public readonly Vector2Int position;
+            public Node Parent;
+            public int GCost;
+            public readonly int HCost;
             
-            public int fCost => gCost + hCost;
-            public bool isObstacle;
+            public int FCost => GCost + HCost;
+            public bool IsObstacle;
 
             public Node(Vector2Int position, Node parent, int gCost, int hCost, bool isObstacle)
             {
                 this.position = position;
-                this.parent = parent;
-                this.gCost = gCost;
-                this.hCost = hCost;
-                this.isObstacle = isObstacle;
+                this.Parent = parent;
+                this.GCost = gCost;
+                this.HCost = hCost;
+                this.IsObstacle = isObstacle;
             }
         }
 
         public static List<Vector2> FindPath(Vector2 from, Vector2 to, Vector2 gridCellSize,
             System.Func<Vector2, bool> isObstacle)
         {
-            gridSize = gridCellSize;
+            _gridSize = gridCellSize;
 
             Vector2Int fromGridPos = GridUtils.WorldToGrid(from);
             Vector2Int toGridPos = GridUtils.WorldToGrid(to);
@@ -67,7 +66,7 @@ namespace _project.scripts.pathfinding
                         continue;
                     }
 
-                    int gCost = currentNode.gCost + CalculateGCost(currentNode.position, adjacentPosition);
+                    int gCost = currentNode.GCost + CalculateGCost(currentNode.position, adjacentPosition);
                     int hCost = CalculateHCost(adjacentPosition, fromGridPos);
 
                     Node adjacentNode = new Node(adjacentPosition, currentNode, gCost, hCost, false);
@@ -75,10 +74,10 @@ namespace _project.scripts.pathfinding
                     int index = openList.FindIndex(node => node.position == adjacentNode.position);
                     if (index != -1)
                     {
-                        if (gCost < openList[index].gCost)
+                        if (gCost < openList[index].GCost)
                         {
-                            openList[index].parent = currentNode;
-                            openList[index].gCost = gCost;
+                            openList[index].Parent = currentNode;
+                            openList[index].GCost = gCost;
                         }
                     }
                     else
@@ -102,7 +101,7 @@ namespace _project.scripts.pathfinding
 
             for (int i = 1; i < nodes.Count; i++)
             {
-                if (nodes[i].fCost < lowestCostNode.fCost || (nodes[i].fCost == lowestCostNode.fCost && nodes[i].hCost < lowestCostNode.hCost))
+                if (nodes[i].FCost < lowestCostNode.FCost || (nodes[i].FCost == lowestCostNode.FCost && nodes[i].HCost < lowestCostNode.HCost))
                 {
                     lowestCostNode = nodes[i];
                 }
@@ -124,7 +123,7 @@ namespace _project.scripts.pathfinding
             while (currentNode != null)
             {
                 path.Add(GridUtils.GridToWorld(currentNode.position));
-                currentNode = currentNode.parent;
+                currentNode = currentNode.Parent;
             }
             path.Reverse();
             return path;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Services.Authentication;
@@ -8,21 +7,20 @@ using Unity.Services.Core;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace _project.scripts.Network
 {
-    public class Relay : MonoBehaviour
+    public class RelayHandler : MonoBehaviour
     {
 
-        public static Relay Singleton { get; private set; }
+        public static RelayHandler Singleton { get; private set; }
         
         [SerializeField] private GameObject canvas;
         
         private UnityTransport _transport;
         private const int MaxPlayer = 2;
 
-        private async void Awake()
+        private void Awake()
         {
             if (Singleton != null)
             {
@@ -30,6 +28,11 @@ namespace _project.scripts.Network
             }
 
             Singleton = this;
+            
+        }
+
+        private async void Start()
+        {
             _transport = FindObjectOfType<UnityTransport>();
             
             if (_transport == null)
@@ -42,11 +45,34 @@ namespace _project.scripts.Network
             canvas.SetActive(true);
         }
 
-        
         private async Task Authenticate()
         {
-            await UnityServices.InitializeAsync();
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            try
+            {
+                await UnityServices.InitializeAsync();
+
+                if (AuthenticationService.Instance.IsSignedIn)
+                {
+                    Debug.Log("Player is already signed in.");
+                    return;
+                }
+
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
+                Debug.Log("Player signed in successfully.");
+            }
+            catch (AuthenticationException authEx)
+            {
+                Debug.LogError($"Authentication failed: {authEx.Message}");
+            }
+            catch (RequestFailedException reqEx)
+            {
+                Debug.LogError($"Request failed: {reqEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"An unexpected error occurred: {ex.Message}");
+            }
         }
 
         public async Task<string> CreateGame()
