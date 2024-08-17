@@ -9,6 +9,7 @@ namespace _project.scripts.Core.CombatSystem.MagazineSystem
     {
         public MagazineSo magazineSo;
         public AmmunitionSo ammunition;
+        public int numberOfMagazine;
     }
     public class Magazine
     {
@@ -49,5 +50,6 @@ namespace _project.scripts.Core.CombatSystem.MagazineSystem
         public int Damage => Mathf.FloorToInt(FilledAmmo.caliberSo.damageAmount * FilledAmmo.damageModifier);
         public int Penetration => Mathf.FloorToInt(FilledAmmo.caliberSo.penetrationAmount * FilledAmmo.penetrationModifier);
         public float Speed => FilledAmmo.caliberSo.bulletSpeed * FilledAmmo.speedModifier;
+        public float Remaining => _remain;
     }
 }

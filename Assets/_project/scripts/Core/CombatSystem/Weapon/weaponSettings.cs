@@ -27,7 +27,7 @@ namespace _project.scripts.Core.CombatSystem
         public float reloadTime;
         
         [Header("Accuracy")]
-        [Range(0f,0.2f)]
+        [Range(0f,0.5f)]
         public float spread;
         [Tooltip("A weapon sway represent the difficulty to use it, it's in degrees and can be change based on diverse facts")]
         public float sway;

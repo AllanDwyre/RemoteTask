@@ -1,3 +1,4 @@
+using _project.scripts.Core.CombatSystem.Weapon;
 using UnityEngine;
 
 namespace _project.scripts.Core.CombatSystem.Projectiles
@@ -8,18 +9,12 @@ namespace _project.scripts.Core.CombatSystem.Projectiles
 
         private AmmunitionSo _settings;
 
-        public void Launch(Vector3 origin, Quaternion rotation, float shotSpeed, Weapon launcher, AmmunitionSo settings)
+        public void Launch(Vector3 origin, Quaternion rotation, float shotSpeed, RangedWeapon launcher, AmmunitionSo settings)
         {
             Launch(origin, rotation, shotSpeed, launcher);
             Renderer.sprite = settings.caliberSo.sprite;
             ProjectileSo = settings.caliberSo;
             _settings = settings;
         }
-
-        // protected override void OnImpact(Transform impactedObject = null)
-        // {
-        //     base.OnImpact(impactedObject);
-        //     // TODO : all the logic about damage
-        // }
     }
 }

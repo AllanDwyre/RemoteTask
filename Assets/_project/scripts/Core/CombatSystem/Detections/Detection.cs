@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using _project.scripts.Characters;
+using _project.scripts.Core.HealthSystem;
 using UnityEngine;
 
 namespace _project.scripts.Core.CombatSystem.Detections
@@ -10,7 +11,6 @@ namespace _project.scripts.Core.CombatSystem.Detections
         private const int MaxCollider = 20;
         private readonly LayerMask _mask;
         private readonly bool _isAi;
-        private readonly bool _simplifiedDetection;
         private readonly float _radius;
         public HashSet<Collider2D> DetectedObjects { get; private set; }= new HashSet<Collider2D>();
 
@@ -20,7 +20,6 @@ namespace _project.scripts.Core.CombatSystem.Detections
             collider.isTrigger = true;
             _mask = mask;
             _isAi = isAi;
-            _simplifiedDetection = simplifiedDetection;
             collider.radius = radius;
             _radius = radius;
         }
@@ -28,6 +27,7 @@ namespace _project.scripts.Core.CombatSystem.Detections
         public void AddDetectedObject(Collider2D other)
         {
             if(other.isTrigger || DetectedObjects.Contains(other) || !IsValidDetection(other)) return;
+            
             DetectedObjects.Add(other);
         }
 
@@ -36,22 +36,22 @@ namespace _project.scripts.Core.CombatSystem.Detections
             DetectedObjects.Remove(other);
         }
 
-        public void PerformVisibilityChecks(Vector3 from, Action<Transform, float> callback)
+        public void PerformVisibilityChecks(Vector3 from, Action<List<Transform>> callback)
         {
+            DetectedObjects.RemoveWhere(
+                x =>
+                        !x.TryGetComponent(out HealthComponent healthComponent)
+                     || healthComponent.HealthStatus is EHealthStatus.Dead
+                );
+            List<Transform> visible = new List<Transform>();
             foreach (var detected in DetectedObjects)
             {
-                if (_simplifiedDetection && OnSimplifiedDetection(detected.transform, from, _mask))
+                if (OnSimplifiedDetection(detected.transform, from, _mask))
                 {
-                    callback(detected.transform, 0.5f);
-                }
-                if(_simplifiedDetection) continue;
-                
-                float centerOfTarget = GetCenterOfTarget(detected.transform, from, _mask);
-                if (centerOfTarget > 0f)
-                {
-                    callback(detected.transform, centerOfTarget);
+                    visible.Add(detected.transform);
                 }
             }
+            callback(visible);
         }
 
         private bool OnSimplifiedDetection(Transform target, Vector3 from, LayerMask mask)
@@ -63,46 +63,17 @@ namespace _project.scripts.Core.CombatSystem.Detections
             Debug.DrawLine(from,from + dir * distance, hit.collider == null ? Color.green : Color.red, 0.4f);
             return hit.collider == null && distance <= _radius;
         }
-        private static float GetCenterOfTarget(Transform target, Vector3 from, LayerMask mask)
-        {
-            if (!target.TryGetComponent(out IObstacle objectObstacle))
-            {
-                return -1f; // No obstacle we consider that as a suppression fire ?? Then we need to adjust the center of fire to the stomach height
-            }
-
-            Height objectHeight = objectObstacle.GetHeight();
-            var dir = (target.position - from).normalized;
-            float distance = Vector2.Distance(target.position, from);
-
-            RaycastHit2D[] results = new RaycastHit2D[MaxCollider];
-            var size = Physics2D.RaycastNonAlloc(from, dir, results, distance, layerMask: mask);
-
-            if (size == 0) return (objectHeight.Min + objectHeight.Max) / 2f - objectHeight.Min;
-
-            float minHeight = objectHeight.Min;
-            float maxHeight = objectHeight.Max;
-
-            for (int i = 0; i < size; i++)
-            {
-                if (!results[i].collider.TryGetComponent(out IObstacle obstacle)) continue;
-
-                Height h = obstacle.GetHeight();
-                if (h.Min > objectHeight.Max) continue;
-
-                if (h.Max > objectHeight.Max)
-                {
-                    return -1f; // Don't take the fact of grenade.
-                }
-
-                maxHeight = Mathf.Min(maxHeight, h.Min);
-                minHeight = Mathf.Max(minHeight, h.Max);
-            }
-            return (minHeight + maxHeight) / 2f - minHeight;
-        }
+        
         private bool IsValidDetection(Collider2D detected)
         {
-            //filter statics (environment)
+            //detect only enemy or player
             if (!detected.CompareTag("Enemy") && !detected.CompareTag("Player")) return false;
+            
+            // is dead or have not healthComponent
+            if (!detected.TryGetComponent(out HealthComponent healthComponent) || healthComponent.HealthStatus is EHealthStatus.Dead)
+            {
+                return false;
+            }
             
             //is IA enemy
             if (_isAi && detected.CompareTag("Player")) return true;
