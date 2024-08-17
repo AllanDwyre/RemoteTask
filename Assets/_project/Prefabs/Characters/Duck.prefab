@@ -206,10 +206,10 @@ GameObject:
   m_Component:
   - component: {fileID: 834854649388833873}
   - component: {fileID: 1926746990349066048}
-  - component: {fileID: 8991131089383778909}
+  - component: {fileID: 5729035228105119642}
   - component: {fileID: 6894175822454822072}
   - component: {fileID: 3909245042322207240}
-  - component: {fileID: 5729035228105119642}
+  - component: {fileID: 8991131089383778909}
   - component: {fileID: 945788950443697628}
   - component: {fileID: 6906279296247933385}
   - component: {fileID: 8136260728304729306}
@@ -290,33 +290,27 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!50 &8991131089383778909
-Rigidbody2D:
-  serializedVersion: 4
+--- !u!114 &5729035228105119642
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3579963846155037067}
-  m_BodyType: 1
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 4
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 1165745535
+  InScenePlacedSourceGlobalObjectIdHash: 3095454592
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!70 &6894175822454822072
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -349,8 +343,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.032936215, y: -0.109999985}
-  m_Size: {x: 0.69169354, y: 0.87169355}
+  m_Offset: {x: 0, y: -0.07999998}
+  m_Size: {x: 0.73989755, y: 0.9512968}
   m_Direction: 0
 --- !u!58 &3909245042322207240
 CircleCollider2D:
@@ -387,27 +381,33 @@ CircleCollider2D:
   m_Offset: {x: 0, y: -0.09}
   serializedVersion: 2
   m_Radius: 15
---- !u!114 &5729035228105119642
-MonoBehaviour:
+--- !u!50 &8991131089383778909
+Rigidbody2D:
+  serializedVersion: 4
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3579963846155037067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1165745535
-  InScenePlacedSourceGlobalObjectIdHash: 3095454592
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
 --- !u!114 &945788950443697628
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -468,24 +468,20 @@ MonoBehaviour:
   detectionRange: 15
   isAI: 1
   visibilityChecksInterval: 0.5
-  primaryWeapon: {fileID: 2667419374872459497}
-  secondaryWeapon: {fileID: 4771011406158148103}
-  primaryParams:
-  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
-    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
-  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
-    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
-  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
-    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
-  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
-    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
-  secondaryParams:
-  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
-    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
+  primaryRangedWeapon: {fileID: 2667419374872459497}
   primaryData:
     value: {fileID: 11400000, guid: d6f8eeba52df4bb4a82a5723dbbfb582, type: 2}
     enable: 1
+  primaryParams:
+  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
+    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
+    numberOfMagazine: 4
+  secondaryRangedWeapon: {fileID: 4771011406158148103}
   secondaryData:
     value: {fileID: 11400000, guid: 63a2037cf0448f64096f8701b5f8399e, type: 2}
     enable: 1
+  secondaryParams:
+  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
+    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
+    numberOfMagazine: 3
   throwable: []

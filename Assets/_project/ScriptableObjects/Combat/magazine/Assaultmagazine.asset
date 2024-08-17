@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Assaultmagazine
   m_EditorClassIdentifier: 
   caliberRequired: {fileID: 11400000, guid: 578ff7f3b6de4a44097cfc58520e5fe6, type: 2}
-  capacity: 15
+  capacity: 10

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e47ba462b2bf4d1b9138ffd240efed25, type: 3}
+  m_Name: Pump
+  m_EditorClassIdentifier: 
+  weaponName: Pump
+  sprite: {fileID: -1530778918, guid: d85f9a590cffc8a468f154e61e19515f, type: 3}
+  caliberSo: {fileID: 11400000, guid: e5b8bf70fa3327344b289ff8b080d005, type: 2}
+  maxRange: 15
+  isSecondaryWeapon: 0
+  muzzlePoint: {x: 0.95, y: 0.03, z: 0}
+  warmUp: 0.6
+  cooldown: 0.8
+  reloadTime: 1.6
+  spread: 0.5
+  sway: 0
+  stoppingPower:
+    value: 0.5
+    enable: 0
+  burstCount: 5
+  burst: 0

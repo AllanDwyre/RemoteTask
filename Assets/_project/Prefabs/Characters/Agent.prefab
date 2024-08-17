@@ -404,7 +404,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2419105778
+  GlobalObjectIdHash: 2818150001
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -653,26 +653,22 @@ MonoBehaviour:
   detectionRange: 60
   isAI: 0
   visibilityChecksInterval: 0.5
-  primaryWeapon: {fileID: 7074976357294206152}
-  secondaryWeapon: {fileID: 5793559674376191091}
-  primaryParams:
-  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
-    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
-  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
-    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
-  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
-    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
-  secondaryParams:
-  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
-    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
-  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
-    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
+  primaryRangedWeapon: {fileID: 7074976357294206152}
   primaryData:
     value: {fileID: 11400000, guid: d6f8eeba52df4bb4a82a5723dbbfb582, type: 2}
     enable: 1
+  primaryParams:
+  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
+    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
+    numberOfMagazine: 20
+  secondaryRangedWeapon: {fileID: 5793559674376191091}
   secondaryData:
     value: {fileID: 11400000, guid: 63a2037cf0448f64096f8701b5f8399e, type: 2}
     enable: 1
+  secondaryParams:
+  - magazineSo: {fileID: 11400000, guid: 0634aa4493a74dd4187b9a746e3fb762, type: 2}
+    ammunition: {fileID: 11400000, guid: 6e657e611e5857f42b33c51c7519b85c, type: 2}
+    numberOfMagazine: 2
   throwable: []
 --- !u!1 &8312735453468992316
 GameObject:

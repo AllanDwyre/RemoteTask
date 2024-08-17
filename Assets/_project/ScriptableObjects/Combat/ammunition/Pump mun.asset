@@ -9,11 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d34fe6b65ed44681ba7af74b34412f1b, type: 3}
-  m_Name: 7.62x39mm
+  m_Script: {fileID: 11500000, guid: 7674d28c84f94e98b4de9aec5d77a545, type: 3}
+  m_Name: Pump mun
   m_EditorClassIdentifier: 
-  sprite: {fileID: 1889508351, guid: d85f9a590cffc8a468f154e61e19515f, type: 3}
-  damageAmount: 10
-  penetrationAmount: 30
-  caliberName: 7.62x39mm
-  bulletSpeed: 15
+  caliberSo: {fileID: 11400000, guid: e5b8bf70fa3327344b289ff8b080d005, type: 2}
+  ammunitionName: Pump mun
+  speedModifier: 1
+  damageModifier: 1
+  penetrationModifier: 1

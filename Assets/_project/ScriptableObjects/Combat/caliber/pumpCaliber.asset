@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d34fe6b65ed44681ba7af74b34412f1b, type: 3}
-  m_Name: 7.62x39mm
+  m_Name: pumpCaliber
   m_EditorClassIdentifier: 
   sprite: {fileID: 1889508351, guid: d85f9a590cffc8a468f154e61e19515f, type: 3}
-  damageAmount: 10
-  penetrationAmount: 30
-  caliberName: 7.62x39mm
+  damageAmount: 5
+  penetrationAmount: 10
+  caliberName: pumpCaliber
   bulletSpeed: 15
