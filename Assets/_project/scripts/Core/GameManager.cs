@@ -48,8 +48,6 @@ namespace _project.scripts.Core
 
         public override void OnNetworkSpawn()
         {
-            if(!IsHost) return;
-            
             if (forceGameplay)
             {
                 StateMachine = new GameStateMachine(new GameplayInitializeState(forceGameplay), Controls);
