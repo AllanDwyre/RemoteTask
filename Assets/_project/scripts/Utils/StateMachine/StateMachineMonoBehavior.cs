@@ -1,40 +1,43 @@
-﻿namespace _project.scripts.Utils.StateMachine
+﻿using UnityEngine;
+
+namespace _project.scripts.Utils.StateMachine
 {
     /// <summary>
     /// Reference all state, oversee the active state, handle transition between states, calls methods of states
     /// </summary>
-    public abstract class StateMachine
+    public abstract class StateMachineMonoBehavior : MonoBehaviour
     {
+        private IState _currentState;
         private readonly IState _idleState;
         private IState _queuedState;
 
-        public IState CurrentState { get; private set; }
+        public IState CurrentState => _currentState;
 
-        protected StateMachine(IState currentState, IState idleState = null)
+        protected StateMachineMonoBehavior(IState currentState, IState idleState = null)
         {
             _idleState = idleState ?? currentState;
-            CurrentState = currentState;
-            CurrentState.Enter();
+            _currentState = currentState;
+            _currentState.Enter();
         }
 
         public void QueueNextState(IState nextState) => _queuedState = nextState;
 
-        public void Update()
+        protected virtual void Update()
         {
             if (_queuedState != null)
             {
                 TransitionToQueuedState();
             }
 
-            (CurrentState ?? _idleState)?.Execute();
+            (_currentState ?? _idleState)?.Execute();
         }
 
         private void TransitionToQueuedState()
         {
-            CurrentState.Exit();
-            CurrentState = _queuedState;
+            _currentState.Exit();
+            _currentState = _queuedState;
             _queuedState = null;
-            CurrentState.Enter();
+            _currentState.Enter();
         }
     }
 }
