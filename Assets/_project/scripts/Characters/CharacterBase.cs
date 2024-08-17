@@ -3,6 +3,7 @@ using _project.scripts.commands;
 using _project.scripts.Core.CombatSystem;
 using _project.scripts.Core.HealthSystem;
 using Unity.Netcode;
+using UnityEngine;
 
 namespace _project.scripts.Characters
 {
@@ -74,6 +75,7 @@ namespace _project.scripts.Characters
         {
             MovementComponent.DisableMovement();
             Combat.DisableCombat();
+            GetComponent<SpriteRenderer>().color = Color.red;
         }
         #endregion
 

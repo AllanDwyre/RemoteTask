@@ -5,17 +5,8 @@ namespace _project.scripts.Characters
     public class Enemy : CharacterBase
     {
         public override string CharacterName { get; protected set; } = "Sam The Duck";
-        public override int Faction { get; protected set; }
+        public override int Faction { get; protected set; } = -1;
         
-        public override void OnNetworkSpawn()
-        {
-            base.OnNetworkSpawn();
-            Faction = -1;
-            if(!IsServer) Destroy(this);
-        }
-
-        
-
         protected override bool EvaluateCommand(ICommand command)
         {
             return true;
